@@ -161,17 +161,24 @@ namespace WindowsJedi.Components {
 			
 
 			using (var g = e.Graphics) {
-				var f = new Font("Arial", 8.0f);
+				var bold = new Font("Arial", 8.0f, FontStyle.Bold);
+				var regular = new Font("Arial", 8.0f, FontStyle.Regular);
 				var wb = new SolidBrush(Color.White);
 				int i = 0;
 				foreach (var window in windows) {
 					if (window.TargetRectangle == null) continue;
 					var title = window.Title;
-					if (i < SelectorKeys.Length) title += "[" + SelectorKeys[i] + "]";
-					g.DrawString(title, f, wb,
-								 new RectangleF(window.TargetRectangle.Value.X, (window.TargetRectangle.Value.Y + window.TargetRectangle.Value.Height) - 18,
-					                            window.TargetRectangle.Value.Width, 20)
-						);
+                    var left = window.TargetRectangle.Value.X;
+                    var bottomOfTile = (window.TargetRectangle.Value.Y + window.TargetRectangle.Value.Height) - 18;
+                    var width = Math.Max(window.TargetRectangle.Value.Width, 20);
+
+
+                    if (i < SelectorKeys.Length)
+                    {
+                        g.DrawString(" " + SelectorKeys[i] + " ", bold, wb, new RectangleF(left, bottomOfTile, width, 20));
+                        left += 15;
+                    }
+                    g.DrawString(title, regular, wb, new RectangleF(left, bottomOfTile, width, 20));
 
 					i++;
 				}

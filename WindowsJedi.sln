@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsJedi", "WindowsJedi\WindowsJedi.csproj", "{9C1D220E-029A-45BC-8E35-ABD7CAF0818B}"
 EndProject
 Global
