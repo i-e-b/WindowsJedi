@@ -16,12 +16,13 @@ What it does
 Planned
 -------
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
+ * Maybe a focus-set, where a few windows are tiled together and the main one can be rotated in.
+ * send-to-back key - focused window goes to the bottom of the stack and next window down gains focus
 
 Todo / Bugs
 -----------
  * Win-Tab doesn't handle maximised windows well if their 'restored' size is significantly different
  * Focus mode isn't strict enough. Should be more like switcher with only one item
- * Maybe a focus-set, where a few windows are tiled together and the main one can be rotated in.
  * Key hooks are lost after a lock/unlock
 
 Interesting code features
