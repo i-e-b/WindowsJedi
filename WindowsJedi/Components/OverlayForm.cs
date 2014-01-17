@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using WindowsJedi.Components;
 
 namespace WindowsJedi {
 	public class OverlayForm : Form {

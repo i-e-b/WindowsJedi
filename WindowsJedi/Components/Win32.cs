@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WindowsJedi {
+namespace WindowsJedi.Components {
 	/// <summary>
 	/// A big pile of Win32 low level calls, constants and data types
 	/// </summary>

@@ -8,14 +8,14 @@ namespace WindowsJedi.Components {
 	/// A form which covers all screens and places itself behind another window
 	/// </summary>
 	public class ConcentrationForm : FullScreenForm {
-		private IntPtr currentWindow;
-		private IntPtr previousWindow;
-		private volatile bool locking;
-		private readonly WindowHookManager winHook;
+		private IntPtr _currentWindow;
+		private IntPtr _previousWindow;
+		private volatile bool _locking;
+		private readonly WindowHookManager _winHook;
 
 		public ConcentrationForm () {
 			Name = "WindowsJedi Concentration Veil";
-			winHook = new WindowHookManager();
+			_winHook = new WindowHookManager();
 		}
 		~ConcentrationForm () {
 			UnConcentrate();
@@ -25,7 +25,7 @@ namespace WindowsJedi.Components {
 		/// Toggle focus lock on or off
 		/// </summary>
 		public void Toggle() {
-			if (locking) UnConcentrate();
+			if (_locking) UnConcentrate();
 			else Concentrate();
 		}
 
@@ -33,10 +33,10 @@ namespace WindowsJedi.Components {
 		/// Lock focus on current frontmost window
 		/// </summary>
 		public void Concentrate() {
-			if (locking) return;
-			locking = true;
-			currentWindow = Win32.GetForegroundWindow();
-			previousWindow = currentWindow;
+			if (_locking) return;
+			_locking = true;
+			_currentWindow = Win32.GetForegroundWindow();
+			_previousWindow = _currentWindow;
 			if (InvokeRequired) {
 				Invoke(new MethodInvoker(ConcentrateFadeIn));
 			} else {
@@ -48,10 +48,10 @@ namespace WindowsJedi.Components {
 		/// Unlock a previously locked focus
 		/// </summary>
 		public void UnConcentrate () {
-			if (!locking) return;
-			locking = false;
-			winHook.WindowFocusChanged -= winHook_WindowFocusChanged;
-			currentWindow = previousWindow;
+			if (!_locking) return;
+			_locking = false;
+			_winHook.WindowFocusChanged -= winHook_WindowFocusChanged;
+			_currentWindow = _previousWindow;
 			if (InvokeRequired) {
 				Invoke(new MethodInvoker(ConcentrateFadeOut));
 			} else {
@@ -70,14 +70,14 @@ namespace WindowsJedi.Components {
 
 		void winHook_WindowFocusChanged (object sender, WindowFocusChangedEventArgs e) {
 			if (!Win32.LockSetForegroundWindow(Win32.LSFW_UNLOCK)) {}
-			if (locking && (e.WindowHandle != this.Handle) && (e.WindowHandle != currentWindow)) {
+			if (_locking && (e.WindowHandle != this.Handle) && (e.WindowHandle != _currentWindow)) {
 				SuspendLayout();
 				TopMost = true;
 				Win32.BringWindowToTop(this.Handle);
 				Win32.SetForegroundWindow(this.Handle);
 				TopMost = false;
-				Win32.BringWindowToTop(currentWindow);
-				Win32.SetForegroundWindow(currentWindow);
+				Win32.BringWindowToTop(_currentWindow);
+				Win32.SetForegroundWindow(_currentWindow);
 				ResumeLayout(false);
 			}
 			if (!Win32.LockSetForegroundWindow(Win32.LSFW_LOCK)) {}
@@ -86,30 +86,30 @@ namespace WindowsJedi.Components {
 		private void ConcentrateFadeIn () {
 			Opacity = 0;
 			Show();
-			Win32.BringWindowToTop(currentWindow);
+			Win32.BringWindowToTop(_currentWindow);
 			if (!Win32.LockSetForegroundWindow(Win32.LSFW_LOCK)) {}
 			
-			while (Opacity < .70 && locking) {
+			while (Opacity < .70 && _locking) {
 				Application.DoEvents();
 				Thread.Sleep(5);
 				Opacity += .04;
 			}
 			
-			winHook.WindowFocusChanged += winHook_WindowFocusChanged;
+			_winHook.WindowFocusChanged += winHook_WindowFocusChanged;
 		}
 
 		private void ConcentrateFadeOut () {
 			//Show();
-			Win32.BringWindowToTop(currentWindow);
+			Win32.BringWindowToTop(_currentWindow);
 			if (!Win32.LockSetForegroundWindow(Win32.LSFW_UNLOCK)) {}
 
-			while (Opacity > 0 && !locking) {
+			while (Opacity > 0 && !_locking) {
 				Application.DoEvents();
 				Thread.Sleep(5);
 				Opacity -= .04;
 			}
 			Hide();
-			currentWindow = IntPtr.Zero;
+			_currentWindow = IntPtr.Zero;
 		}
 	}
 }

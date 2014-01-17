@@ -7,19 +7,19 @@ using System.Collections.Generic;
 
 namespace WindowsJedi.Components {
 	public static class WindowEnumeration {
-		private static readonly List<Window> windows = new List<Window>();
+		private static readonly List<Window> Windows = new List<Window>();
 
 		public static List<Window> GetCurrentWindows() {
-			windows.Clear();
+			Windows.Clear();
 			Win32.EnumWindows(Callback, 0);
-			return windows;
+			return Windows;
 		}
 
 		private static bool Callback (IntPtr hwnd, int lParam) {
 			if ((Win32.GetWindowLongA(hwnd, Win32.GWL_STYLE) & (Win32.WS_BORDER | Win32.WS_CHILD | Win32.WS_VISIBLE))
 				== (Win32.WS_BORDER | Win32.WS_VISIBLE)
 				) {
-				windows.Add(new Window(hwnd));
+				Windows.Add(new Window(hwnd));
 			}
 			return true; // continue enumeration
 		}

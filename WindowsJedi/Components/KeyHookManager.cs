@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using WindowsJedi.Components;
 
 namespace WindowsJedi {
 	public class KeyHookManager {
@@ -10,19 +11,21 @@ namespace WindowsJedi {
 
 		public KeyHookManager () {
 			keyboardState = new HashSet<Keys>();
+			_keyboardHookProcedure = KeyboardHookProc;
 			Start();
 		}
 
 		~KeyHookManager () {
 			Stop();
+            GC.KeepAlive(_keyboardHookProcedure);
 		}
 
 		public event KeyEventHandler KeyDown;
 		public event KeyPressEventHandler KeyPress;
 		public event KeyEventHandler KeyUp;
 
-		static int hKeyboardHook;
-		Win32.HookProc KeyboardHookProcedure;
+		static int _hKeyboardHook;
+	    readonly Win32.HookProc _keyboardHookProcedure;
 
 		[StructLayout(LayoutKind.Sequential)]
 		public class KeyboardHookStruct {
@@ -34,22 +37,21 @@ namespace WindowsJedi {
 		}
 
 		public void Start () {
-			KeyboardHookProcedure = new Win32.HookProc(KeyboardHookProc);
 			using (Process curProcess = Process.GetCurrentProcess())
 			using (ProcessModule curModule = curProcess.MainModule) {
-				hKeyboardHook = Win32.SetWindowsHookEx(Win32.WH_KEYBOARD_LL, KeyboardHookProcedure,
+				_hKeyboardHook = Win32.SetWindowsHookEx(Win32.WH_KEYBOARD_LL, _keyboardHookProcedure,
 					Win32.GetModuleHandle(curModule.ModuleName), 0);
 			}
-			if (hKeyboardHook == 0) {
+			if (_hKeyboardHook == 0) {
 				Stop();
 				throw new Exception("SetWindowsHookEx startup failed.");
 			}
 		}
 
 		public void Stop () {
-			if (hKeyboardHook == 0) return;
-			Win32.UnhookWindowsHookEx(hKeyboardHook);
-			hKeyboardHook = 0;
+			if (_hKeyboardHook == 0) return;
+			Win32.UnhookWindowsHookEx(_hKeyboardHook);
+			_hKeyboardHook = 0;
 		}
 
 		public static bool IsKeyHeld (Keys key) {
@@ -106,7 +108,7 @@ namespace WindowsJedi {
 
 			}
 			if (suppressKeyPress) return 1;
-			return Win32.CallNextHookEx(hKeyboardHook, nCode, wParam, lParam);
+			return Win32.CallNextHookEx(_hKeyboardHook, nCode, wParam, lParam);
 		}
 
 

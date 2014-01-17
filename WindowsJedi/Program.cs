@@ -20,8 +20,10 @@ namespace WindowsJedi {
 			switcherForm = new SwitcherForm();
 
 			hotKeys = new HotkeyCore();
-			hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, () => switcherForm.Toggle());
-			hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, () => concentrationForm.Toggle());
+            Action toggleSwitcher = () => switcherForm.Toggle();
+            Action toggleConcentration = () => concentrationForm.Toggle();
+            hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, toggleSwitcher);
+            hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, toggleConcentration);
 
 			notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "http://snippetsfor.net/WindowsJedi");
 			notify.AddMenuItem("Settings", delegate { (new UserInterface.Settings()).ShowDialog(); });
@@ -29,10 +31,17 @@ namespace WindowsJedi {
 			Application.ThreadException += Application_ThreadException;
 
 			Application.Run();
+
+            GC.KeepAlive(concentrationForm);
+            GC.KeepAlive(switcherForm);
+            GC.KeepAlive(hotKeys);
+            GC.KeepAlive(notify);
+            GC.KeepAlive(dummyForm);
+            GC.KeepAlive(toggleConcentration);
+            GC.KeepAlive(toggleSwitcher);
 		}
 
 		static void Application_ThreadException (object sender, System.Threading.ThreadExceptionEventArgs e) {
-			
 		}
 
 		private static void InitialiseWinForms() {

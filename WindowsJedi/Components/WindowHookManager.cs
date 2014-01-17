@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading;
 
 namespace WindowsJedi.Components {
 	class WindowHookManager {
-		private readonly IntPtr windowsEventsHook;
+		private readonly IntPtr _windowsEventsHook;
+        private readonly Win32.WinEventDelegate _hookDelegate;
+        volatile bool _running;
 
-		public event EventHandler<WindowFocusChangedEventArgs> WindowFocusChanged;
+	    public event EventHandler<WindowFocusChangedEventArgs> WindowFocusChanged;
 
 		public void InvokeWindowFocusChanged(IntPtr windowHandle) {
 			EventHandler<WindowFocusChangedEventArgs> handler = WindowFocusChanged;
@@ -12,12 +15,26 @@ namespace WindowsJedi.Components {
 		}
 
 		public WindowHookManager () {
-			windowsEventsHook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND,
+            _running = true;
+            _hookDelegate = WinEventProc;
+			_windowsEventsHook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND,
 						  Win32.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero,
 						  WinEventProc, 0, 0, Win32.WINEVENT_OUTOFCONTEXT);
+
+            var t = new Thread(() => {
+                while (_running) { Thread.Sleep(10000); } 
+            
+
+            GC.KeepAlive(WindowFocusChanged);
+            GC.KeepAlive(_windowsEventsHook);
+            GC.KeepAlive(_hookDelegate);
+            }) {IsBackground = true};
+		    t.Start();
 		}
-		~WindowHookManager () {
-			Win32.UnhookWinEvent(windowsEventsHook);
+        ~WindowHookManager()
+        {
+			Win32.UnhookWinEvent(_windowsEventsHook);
+            _running = false;
 		}
 
 		private void WinEventProc (IntPtr hWinEventHook, uint eventType,
@@ -31,14 +48,14 @@ namespace WindowsJedi.Components {
 	}
 
 	internal class WindowFocusChangedEventArgs : EventArgs {
-		private readonly IntPtr windowHandle;
+		private readonly IntPtr _windowHandle;
 
 		public WindowFocusChangedEventArgs(IntPtr windowHandle) {
-			this.windowHandle = windowHandle;
+			_windowHandle = windowHandle;
 		}
 
 		public IntPtr WindowHandle {
-			get { return windowHandle; }
+			get { return _windowHandle; }
 		}
 	}
 }
