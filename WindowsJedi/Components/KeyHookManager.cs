@@ -8,16 +8,19 @@ using WindowsJedi.Components;
 namespace WindowsJedi {
 	public class KeyHookManager {
 		private readonly HashSet<Keys> keyboardState;
+	    readonly Win32.HookProc _keyboardHookProcedure;
+	    private GCHandle _pin1;
 
 		public KeyHookManager () {
 			keyboardState = new HashSet<Keys>();
 			_keyboardHookProcedure = KeyboardHookProc;
+            _pin1 = GCHandle.Alloc(_keyboardHookProcedure);
 			Start();
 		}
 
 		~KeyHookManager () {
 			Stop();
-            GC.KeepAlive(_keyboardHookProcedure);
+            _pin1.Free();
 		}
 
 		public event KeyEventHandler KeyDown;
@@ -25,9 +28,8 @@ namespace WindowsJedi {
 		public event KeyEventHandler KeyUp;
 
 		static int _hKeyboardHook;
-	    readonly Win32.HookProc _keyboardHookProcedure;
 
-		[StructLayout(LayoutKind.Sequential)]
+	    [StructLayout(LayoutKind.Sequential)]
 		public class KeyboardHookStruct {
 			public int vkCode;	//Specifies a virtual-key code. The code must be a value in the range 1 to 254. 
 			public int scanCode; // Specifies a hardware scan code for the key. 

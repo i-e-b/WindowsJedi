@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Threading;
+using System.Runtime.InteropServices;
 
 namespace WindowsJedi.Components {
 	class WindowHookManager {
 		private readonly IntPtr _windowsEventsHook;
         private readonly Win32.WinEventDelegate _hookDelegate;
-        volatile bool _running;
+	    private GCHandle _pin1, _pin2, _pin3;
 
 	    public event EventHandler<WindowFocusChangedEventArgs> WindowFocusChanged;
 
@@ -15,26 +15,21 @@ namespace WindowsJedi.Components {
 		}
 
 		public WindowHookManager () {
-            _running = true;
             _hookDelegate = WinEventProc;
 			_windowsEventsHook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND,
 						  Win32.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero,
 						  WinEventProc, 0, 0, Win32.WINEVENT_OUTOFCONTEXT);
 
-            var t = new Thread(() => {
-                while (_running) { Thread.Sleep(10000); } 
-            
-
-            GC.KeepAlive(WindowFocusChanged);
-            GC.KeepAlive(_windowsEventsHook);
-            GC.KeepAlive(_hookDelegate);
-            }) {IsBackground = true};
-		    t.Start();
+            _pin1 = GCHandle.Alloc(WindowFocusChanged);
+            _pin2 = GCHandle.Alloc(_windowsEventsHook);
+            _pin3 = GCHandle.Alloc(_hookDelegate);
 		}
         ~WindowHookManager()
         {
 			Win32.UnhookWinEvent(_windowsEventsHook);
-            _running = false;
+            _pin1.Free();
+            _pin2.Free();
+            _pin3.Free();
 		}
 
 		private void WinEventProc (IntPtr hWinEventHook, uint eventType,

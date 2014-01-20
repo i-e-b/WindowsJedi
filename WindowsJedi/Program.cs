@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WindowsJedi.Components;
 using WindowsJedi.Properties;
@@ -22,6 +23,10 @@ namespace WindowsJedi {
 			hotKeys = new HotkeyCore();
             Action toggleSwitcher = () => switcherForm.Toggle();
             Action toggleConcentration = () => concentrationForm.Toggle();
+
+            var pin1 = GCHandle.Alloc(toggleSwitcher);
+            var pin2 = GCHandle.Alloc(toggleConcentration);
+
             hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, toggleSwitcher);
             hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, toggleConcentration);
 
@@ -32,13 +37,8 @@ namespace WindowsJedi {
 
 			Application.Run();
 
-            GC.KeepAlive(concentrationForm);
-            GC.KeepAlive(switcherForm);
-            GC.KeepAlive(hotKeys);
-            GC.KeepAlive(notify);
-            GC.KeepAlive(dummyForm);
-            GC.KeepAlive(toggleConcentration);
-            GC.KeepAlive(toggleSwitcher);
+            pin1.Free();
+            pin2.Free();
 		}
 
 		static void Application_ThreadException (object sender, System.Threading.ThreadExceptionEventArgs e) {
