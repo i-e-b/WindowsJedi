@@ -18,6 +18,7 @@ Planned
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
  * Maybe a focus-set, where a few windows are tiled together and the main one can be rotated in.
  * send-to-back key - focused window goes to the bottom of the stack and next window down gains focus
+ * hide/show floating windows - momentarily set floating windows (specifically VisualStudio tool windows) to transparent.
 
 Todo / Bugs
 -----------
