@@ -10,19 +10,20 @@ namespace WindowsJedi.Components {
 	    public event EventHandler<WindowFocusChangedEventArgs> WindowFocusChanged;
 
 		public void InvokeWindowFocusChanged(IntPtr windowHandle) {
-			EventHandler<WindowFocusChangedEventArgs> handler = WindowFocusChanged;
+			var handler = WindowFocusChanged;
 			if (handler != null) handler(this, new WindowFocusChangedEventArgs(windowHandle));
 		}
 
 		public WindowHookManager () {
             _hookDelegate = WinEventProc;
-			_windowsEventsHook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND,
-						  Win32.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero,
-						  WinEventProc, 0, 0, Win32.WINEVENT_OUTOFCONTEXT);
-
             _pin1 = GCHandle.Alloc(WindowFocusChanged);
             _pin2 = GCHandle.Alloc(_windowsEventsHook);
             _pin3 = GCHandle.Alloc(_hookDelegate);
+
+			_windowsEventsHook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND,
+						  Win32.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero,
+                          _hookDelegate, 0, 0, Win32.WINEVENT_OUTOFCONTEXT);
+
 		}
         ~WindowHookManager()
         {
