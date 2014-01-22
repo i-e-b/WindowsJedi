@@ -25,9 +25,7 @@ Todo / Bugs
 -----------
  * Win-Tab doesn't handle maximised windows well if their 'restored' size is significantly different
  * Focus mode isn't strict enough. Should be more like switcher with only one item
- * Key hooks are lost after a lock/unlock
- * Window hooks seem to be causing unmanaged exceptions -- probably the call back is being garbage collected
-   - have a partial resolution with GC pinning, need to go through and carefully check disposal and ensure no memory leaks
+ * Window hooks are gc pinned - need to go through and carefully check disposal and ensure no memory leaks
 
 Interesting code features
 -------------------------
