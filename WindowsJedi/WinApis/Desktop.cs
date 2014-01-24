@@ -307,7 +307,6 @@ namespace WindowsJedi.WinApis {
 		#endregion
 
 
-		#region Methods
 		/// <summary>
 		/// Creates a new desktop.  If a handle is open, it will be closed.
 		/// </summary>
@@ -512,7 +511,6 @@ namespace WindowsJedi.WinApis {
 				CreateProcess("explorer.exe");
 			}
 		}
-		#endregion
 
 		#region Static Methods
 		/// <summary>

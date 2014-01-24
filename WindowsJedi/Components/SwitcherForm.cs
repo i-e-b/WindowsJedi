@@ -17,26 +17,26 @@ namespace WindowsJedi.Components {
 			public Keys Key;
 			public bool Up;
 		}
-		private volatile bool showing;
-		private readonly List<Window> windows;
-		private readonly KeyHookManager keyMgr;
-		private readonly Queue<PassThroughKey> passThroughKeys;
+		private volatile bool _showing;
+		private readonly List<Window> _windows;
+		private readonly KeyHookManager _keyMgr;
+		private readonly Queue<PassThroughKey> _passThroughKeys;
 		private const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 
 		public SwitcherForm() {
-			keyMgr = new KeyHookManager();
-			keyMgr.KeyDown += keyMgr_KeyDown;
-			keyMgr.KeyUp += keyMgr_KeyUp;
+			_keyMgr = new KeyHookManager();
+			_keyMgr.KeyDown += keyMgr_KeyDown;
+			_keyMgr.KeyUp += keyMgr_KeyUp;
 			KeyPreview = true;
-			passThroughKeys = new Queue<PassThroughKey>();
-			windows = new List<Window>();
+			_passThroughKeys = new Queue<PassThroughKey>();
+			_windows = new List<Window>();
 		}
 
         protected override void Dispose(bool disposing)
         {
-			keyMgr.Stop();
-            keyMgr.Dispose();
+			_keyMgr.Stop();
+            _keyMgr.Dispose();
 			HideSwitcher();
             base.Dispose(disposing);
         }
@@ -45,7 +45,7 @@ namespace WindowsJedi.Components {
 		/// Show or hide the switcher window.
 		/// </summary>
 		public void Toggle() {
-			if (showing) HideSwitcher();
+			if (_showing) HideSwitcher();
 			else ShowSwitcher();
 		}
 
@@ -56,11 +56,11 @@ namespace WindowsJedi.Components {
 			Show();
 			TopMost = true;
 			Win32.SetForegroundWindow(Handle);
-			showing = true;
+			_showing = true;
 		}
 
 		public void HideSwitcher () {
-			showing = false;
+			_showing = false;
 			HideDwmThumbs();
 			TopMost = false;
 			Hide();
@@ -71,8 +71,8 @@ namespace WindowsJedi.Components {
 		/// Switch to a window if user clicks on it's tile
 		/// </summary>
 		protected override void OnMouseClick (MouseEventArgs e) {
-			if (!showing) return;
-			foreach (var window in windows) {
+			if (!_showing) return;
+			foreach (var window in _windows) {
 				if (window.TargetRectangle == null) continue;
 
 				if (window.TargetRectangle.Value.Contains(e.Location)) {
@@ -83,13 +83,13 @@ namespace WindowsJedi.Components {
 		}
 
 		void keyMgr_KeyUp (object sender, KeyEventArgs e) {
-			if (showing) {
+			if (_showing) {
 				GenerateKey(Keys.F24, true);
 			}
 		}
 
 		private void keyMgr_KeyDown (object sender, KeyEventArgs e) {
-			if (showing) {
+			if (_showing) {
 				if (HandleKeyDown(e.KeyData)) {
 					e.SuppressKeyPress = true;
 				} else {
@@ -107,10 +107,10 @@ namespace WindowsJedi.Components {
 		}
 
 		private bool ShouldIgnoreKey (Keys key, bool keyUp) {
-			if (passThroughKeys.Count > 0) {
-				PassThroughKey key2 = passThroughKeys.Peek();
+			if (_passThroughKeys.Count > 0) {
+				PassThroughKey key2 = _passThroughKeys.Peek();
 				if ((key2.Up == keyUp) && (key2.Key == key)) {
-					passThroughKeys.Dequeue();
+					_passThroughKeys.Dequeue();
 					return true;
 				}
 			}
@@ -122,9 +122,9 @@ namespace WindowsJedi.Components {
 				Key = key,
 				Up = up
 			};
-			passThroughKeys.Enqueue(item);
+			_passThroughKeys.Enqueue(item);
 
-			Win32.KeyboardInputFlags none = Win32.KeyboardInputFlags.None;
+			var none = Win32.KeyboardInputFlags.None;
 			if (((int)key & 0x800000) == 0x800000) {
 				none |= Win32.KeyboardInputFlags.None | Win32.KeyboardInputFlags.ExtendedKey;
 			}
@@ -134,15 +134,21 @@ namespace WindowsJedi.Components {
 			try {
 				Win32.keybd_event((byte)(key & Keys.KeyCode), 0, none, IntPtr.Zero);
 			} catch {
-				return;
+                Ignore();
 			}
 		}
-		#endregion
+
+        /// <summary>
+        /// Marks exceptions as explicitly dropped
+        /// </summary>
+	    private void Ignore() { }
+
+	    #endregion
 		/// <summary>
 		/// Switch to a window if user presses it's quick-key
 		/// </summary>
 		protected bool HandleKeyDown (Keys k) {
-			if (!showing) return false;
+			if (!_showing) return false;
 
 			if (k == Keys.Escape) {
 				HideSwitcher();
@@ -151,16 +157,16 @@ namespace WindowsJedi.Components {
 
 			var converter = new KeysConverter();
 			string ch = (converter.ConvertToString(k)??"").ToUpper();
-			var idx = SelectorKeys.IndexOf(ch);
+			var idx = SelectorKeys.IndexOf(ch, StringComparison.Ordinal);
 			if (idx < 0) return false;
-			if (idx >= windows.Count) return true;
-			windows[idx].Focus();
+			if (idx >= _windows.Count) return true;
+			_windows[idx].Focus();
 			HideSwitcher();
 			return true;
 		}
 
 		protected override void OnPaint (PaintEventArgs e) {
-			if (!showing) return;
+			if (!_showing) return;
 			// TODO: some kind of overlay form for the titles and shortcuts -- DWM is overwriting this...
 			
 
@@ -169,13 +175,14 @@ namespace WindowsJedi.Components {
 				var regular = new Font("Arial", 8.0f, FontStyle.Regular);
 				var wb = new SolidBrush(Color.White);
 				int i = 0;
-				foreach (var window in windows) {
+				foreach (var window in _windows) {
 					if (window.TargetRectangle == null) continue;
-					var title = window.Title;
-                    var left = window.TargetRectangle.Value.X;
-                    var bottomOfTile = (window.TargetRectangle.Value.Y + window.TargetRectangle.Value.Height) - 18;
-                    var width = Math.Max(window.TargetRectangle.Value.Width, 20);
+                    var rect = window.TargetRectangle.Value;
 
+					var title = window.Title;
+                    var left = rect.X;
+                    var bottomOfTile = (rect.Y + rect.Height) - 18;
+                    var width = Math.Max(rect.Width, 20);
 
                     if (i < SelectorKeys.Length)
                     {
@@ -191,11 +198,11 @@ namespace WindowsJedi.Components {
 
 		#region Thumbnails
 		private void GetAndPackWindows() {
-			windows.Clear();
-			windows.AddRange(WindowEnumeration.GetCurrentWindows());
+			_windows.Clear();
+			_windows.AddRange(WindowEnumeration.GetCurrentWindows());
 			var scale = 0.7;
-			if (windows.Count > 15) scale = 0.5;
-			while (!TryPacking(windows, scale) && scale > 0.1) {
+			if (_windows.Count > 15) scale = 0.5;
+			while (!TryPacking(_windows, scale) && scale > 0.1) {
 				scale *= 0.8;
 			}
 		}
@@ -204,10 +211,12 @@ namespace WindowsJedi.Components {
 			var packer = new CygonRectanglePacker(Width, Height);
 			foreach (var window in windows) {
 				try {
-					var ts = (window.Rectangle.Width * window.Rectangle.Height < 10000) ? 1.0 : scale;
+				    var rect = window.Rectangle;
+
+				    var ts = (rect.Width * rect.Height < 10000) ? 1.0 : scale; // show tiny windows at full size
 					window.TargetRectangle = new Rectangle(
-						packer.Pack((int)(window.Rectangle.Width * ts), (int)(window.Rectangle.Height * ts) + 20),
-						new Size((int)(window.Rectangle.Width * ts), (int)(window.Rectangle.Height * ts) + 20));
+						packer.Pack((int)(rect.Width * ts), (int)(rect.Height * ts) + 20),
+						new Size((int)(rect.Width * ts), (int)(rect.Height * ts) + 20));
 				} catch {
 					return false;
 				}
@@ -216,14 +225,14 @@ namespace WindowsJedi.Components {
 		}
 
 		private void ShowDwmThumbs () {
-			foreach (var window in windows) {
+			foreach (var window in _windows) {
 				if (window.TargetRectangle != null)
 					window.ShowDwmThumb(this, window.TargetRectangle.Value);
 			}
 		}
 
 		private void HideDwmThumbs () {
-			foreach (var window in windows) {
+			foreach (var window in _windows) {
 				window.ReleaseDwmThumb();
 			}
 		}

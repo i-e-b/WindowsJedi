@@ -47,23 +47,93 @@ namespace WindowsJedi.WinApis {
 			}
 		}
 
-		public Rectangle Rectangle {
+        /// <summary>
+        /// Gives the size of a window in 'Restored' mode
+        /// </summary>
+        public Rectangle NormalRectangle
+        {
+            get
+            {
+                var placement = Win32.WindowPlacement.Default;
+                if (!Win32.GetWindowPlacement(_handle, ref placement))
+                {
+                    Win32.Rect rect;
+                    Win32.GetWindowRect(_handle, out rect);
+                    return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+                }
+                return new Rectangle(
+                    placement.NormalPosition.Left,
+                    placement.NormalPosition.Top,
+                    placement.NormalPosition.Right - placement.NormalPosition.Left,
+                    placement.NormalPosition.Bottom - placement.NormalPosition.Top);
+            }
+        }
+
+        /// <summary>
+        /// Gets the best estimate of a window's presentation size
+        /// </summary>
+        public Rectangle SafeRectangle
+        {
+            get {
+                var normal = NormalRectangle;
+                var layout = LayoutRectangle;
+
+                var nsize = normal.Width * normal.Height;
+                var lsize = layout.Width * layout.Height;
+
+                return (nsize > lsize) ? normal : layout;
+            }
+        }
+
+        /// <summary>
+        /// Gives the current layout rectangle of the window
+        /// </summary>
+		public Rectangle LayoutRectangle {
 			get {
-				var placement = Win32.WindowPlacement.Default;
-				if (!Win32.GetWindowPlacement(_handle, ref placement)) {
-					Win32.Rect rect;
-					Win32.GetWindowRect(_handle, out rect);
-					return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
-				}
-				return new Rectangle(
-					placement.NormalPosition.Left,
-					placement.NormalPosition.Top,
-					placement.NormalPosition.Right - placement.NormalPosition.Left,
-					placement.NormalPosition.Bottom - placement.NormalPosition.Top);
+                Win32.Rect rect;
+                Win32.GetWindowRect(_handle, out rect);
+                return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
 			}
 		}
 
 		public Rectangle? TargetRectangle { get; set; }
+
+        /// <summary>
+        /// Size of window as it would be if it was focused state
+        /// </summary>
+        public Rectangle Rectangle
+        {
+            get
+            {
+                var s = DwmThumbAspect();
+
+                if (s.IsEmpty) return SafeRectangle;
+
+                return new Rectangle(0, 0, s.Width, s.Height);
+            }
+        }
+
+        /// <summary>
+        /// Return approximate aspect ratio of the thumbnail DWM would show.
+        /// </summary>
+        public Size DwmThumbAspect()
+        {
+            IntPtr dwmThumb = IntPtr.Zero;
+            try
+            {
+                int i = Win32.DwmRegisterThumbnail(Program.DummyForm.Handle, _handle, out dwmThumb);
+                if (i != 0) return new Size(SafeRectangle.Width, SafeRectangle.Height);
+                
+                Win32.PSIZE size;
+                Win32.DwmQueryThumbnailSourceSize(dwmThumb, out size);
+
+                return new Size(size.x, size.y);
+            } 
+            finally
+            {
+                if (dwmThumb != IntPtr.Zero) Win32.DwmUnregisterThumbnail(dwmThumb);
+            }
+        }
 
 		public void ShowDwmThumb(Form host, Rectangle destination) {
 			ReleaseDwmThumb();
