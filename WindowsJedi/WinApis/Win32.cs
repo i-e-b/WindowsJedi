@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WindowsJedi.Components {
+namespace WindowsJedi.WinApis {
 	/// <summary>
 	/// A big pile of Win32 low level calls, constants and data types
 	/// </summary>
@@ -95,7 +95,6 @@ namespace WindowsJedi.Components {
 		}
 
 
-		[Serializable]
 		[StructLayout(LayoutKind.Sequential)]
 		internal struct WindowPlacement {
 			public int Length;

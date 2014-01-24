@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
+using WindowsJedi.WinApis;
 
 namespace WindowsJedi.Components {
 	/// <summary>
@@ -17,9 +17,13 @@ namespace WindowsJedi.Components {
 			Name = "WindowsJedi Concentration Veil";
 			_winHook = new WindowHookManager();
 		}
-		~ConcentrationForm () {
+
+        protected override void Dispose(bool disposing)
+        {
+            _winHook.Dispose();
 			UnConcentrate();
-		}
+            base.Dispose(disposing);
+        }
 
 		/// <summary>
 		/// Toggle focus lock on or off
@@ -68,13 +72,16 @@ namespace WindowsJedi.Components {
 			}
 		}
 
+        /// <summary>
+        /// Event handler tries to force focused window to the front
+        /// </summary>
 		void winHook_WindowFocusChanged (object sender, WindowFocusChangedEventArgs e) {
 			if (!Win32.LockSetForegroundWindow(Win32.LSFW_UNLOCK)) {}
-			if (_locking && (e.WindowHandle != this.Handle) && (e.WindowHandle != _currentWindow)) {
+			if (_locking && (e.WindowHandle != Handle) && (e.WindowHandle != _currentWindow)) {
 				SuspendLayout();
 				TopMost = true;
-				Win32.BringWindowToTop(this.Handle);
-				Win32.SetForegroundWindow(this.Handle);
+				Win32.BringWindowToTop(Handle);
+				Win32.SetForegroundWindow(Handle);
 				TopMost = false;
 				Win32.BringWindowToTop(_currentWindow);
 				Win32.SetForegroundWindow(_currentWindow);

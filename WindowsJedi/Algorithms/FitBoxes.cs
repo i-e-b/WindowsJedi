@@ -11,39 +11,39 @@ namespace WindowsJedi.Algorithms {
 		/// <summary>
 		/// Fit rectangles into a given width. Total height required is returned
 		/// </summary>
-		public int AlgFillByStripes (int bin_width, Rectangle[] rects) {
+		public int AlgFillByStripes (int binWidth, Rectangle[] rects) {
 			// Sort by height.
-			var best_rects = (Rectangle[])rects.Clone();
-			Array.Sort(best_rects, new HeightComparer());
+			var bestRects = (Rectangle[])rects.Clone();
+			Array.Sort(bestRects, new HeightComparer());
 
 			// Make variables to track and record the best solution.
-			var is_positioned = new bool[best_rects.Length];
-			var num_unpositioned = best_rects.Length;
+			var isPositioned = new bool[bestRects.Length];
+			var numUnpositioned = bestRects.Length;
 
 			// Fill by stripes.
-			int max_y = 0;
+			int maxY = 0;
 			for (int i = 0; i <= rects.Length - 1; i++) {
 				// See if this rectangle is positioned.
-				if (!is_positioned[i]) {
+				if (!isPositioned[i]) {
 					// Start a new stripe.
-					num_unpositioned -= 1;
-					is_positioned[i] = true;
-					best_rects[i].X = 0;
-					best_rects[i].Y = max_y;
+					numUnpositioned -= 1;
+					isPositioned[i] = true;
+					bestRects[i].X = 0;
+					bestRects[i].Y = maxY;
 
 					FillBoundedArea(
-						best_rects[i].Width, bin_width, max_y,
-						max_y + best_rects[i].Height,
-						ref num_unpositioned, ref best_rects, ref is_positioned);
+						bestRects[i].Width, binWidth, maxY,
+						maxY + bestRects[i].Height,
+						ref numUnpositioned, ref bestRects, ref isPositioned);
 					
-					if (num_unpositioned == 0) break;
-					max_y += best_rects[i].Height;
+					if (numUnpositioned == 0) break;
+					maxY += bestRects[i].Height;
 				}
 			}
 
 			// Save the best solution.
-			Array.Copy(best_rects, rects, rects.Length);
-			return max_y;
+			Array.Copy(bestRects, rects, rects.Length);
+			return maxY;
 		}
 
 		// Use rectangles to fill the given sub-area.
@@ -58,118 +58,118 @@ namespace WindowsJedi.Algorithms {
 		//       max_y               - The largest Y value for this solution.
 		private void FillBoundedArea (
 			int xmin, int xmax, int ymin, int ymax,
-			ref int num_unpositioned, ref Rectangle[] rects, ref bool[] is_positioned) {
+			ref int numUnpositioned, ref Rectangle[] rects, ref bool[] isPositioned) {
 			// See if every rectangle has been positioned.
-			if (num_unpositioned <= 0) return;
+			if (numUnpositioned <= 0) return;
 
 			// Save a copy of the solution so far.
-			int best_num_unpositioned = num_unpositioned;
-			var best_rects = (Rectangle[])rects.Clone();
-			var best_is_positioned = (bool[])is_positioned.Clone();
+			int bestNumUnpositioned = numUnpositioned;
+			var bestRects = (Rectangle[])rects.Clone();
+			var bestIsPositioned = (bool[])isPositioned.Clone();
 
 			// Currently we have no solution for this area.
-			double best_density = 0;
+			double bestDensity = 0;
 
 			// Some rectangles have not been positioned.
 			// Loop through the available rectangles.
 			for (int i = 0; i <= rects.Length - 1; i++) {
 				// See if this rectangle is not position and will fit.
-				if ((!is_positioned[i]) &&
+				if ((!isPositioned[i]) &&
 					(rects[i].Width <= xmax - xmin) &&
 					(rects[i].Height <= ymax - ymin)) {
 					// It will fit. Try it.
 					// **************************************************
 					// Divide the remaining area horizontally.
-					int test1_num_unpositioned = num_unpositioned - 1;
-					var test1_rects = (Rectangle[])rects.Clone();
-					var test1_is_positioned = (bool[])is_positioned.Clone();
-					test1_rects[i].X = xmin;
-					test1_rects[i].Y = ymin;
-					test1_is_positioned[i] = true;
+					int test1NumUnpositioned = numUnpositioned - 1;
+					var test1Rects = (Rectangle[])rects.Clone();
+					var test1IsPositioned = (bool[])isPositioned.Clone();
+					test1Rects[i].X = xmin;
+					test1Rects[i].Y = ymin;
+					test1IsPositioned[i] = true;
 
 					// Fill the area on the right.
 					FillBoundedArea(xmin + rects[i].Width, xmax, ymin, ymin + rects[i].Height,
-						ref test1_num_unpositioned, ref test1_rects, ref test1_is_positioned);
+						ref test1NumUnpositioned, ref test1Rects, ref test1IsPositioned);
 					// Fill the area on the bottom.
 					FillBoundedArea(xmin, xmax, ymin + rects[i].Height, ymax,
-						ref test1_num_unpositioned, ref test1_rects, ref test1_is_positioned);
+						ref test1NumUnpositioned, ref test1Rects, ref test1IsPositioned);
 
 					// Learn about the test solution.
-					double test1_density =
+					double test1Density =
 						SolutionDensity(
 							xmin + rects[i].Width, xmax, ymin, ymin + rects[i].Height,
 							xmin, xmax, ymin + rects[i].Height, ymax,
-							test1_rects, test1_is_positioned);
+							test1Rects, test1IsPositioned);
 
 					// See if this is better than the current best solution.
-					if (test1_density >= best_density) {
+					if (test1Density >= bestDensity) {
 						// The test is better. Save it.
-						best_density = test1_density;
-						best_rects = test1_rects;
-						best_is_positioned = test1_is_positioned;
-						best_num_unpositioned = test1_num_unpositioned;
+						bestDensity = test1Density;
+						bestRects = test1Rects;
+						bestIsPositioned = test1IsPositioned;
+						bestNumUnpositioned = test1NumUnpositioned;
 					}
 
 					// **************************************************
 					// Divide the remaining area vertically.
-					int test2_num_unpositioned = num_unpositioned - 1;
-					var test2_rects = (Rectangle[])rects.Clone();
-					var test2_is_positioned = (bool[])is_positioned.Clone();
-					test2_rects[i].X = xmin;
-					test2_rects[i].Y = ymin;
-					test2_is_positioned[i] = true;
+					int test2NumUnpositioned = numUnpositioned - 1;
+					var test2Rects = (Rectangle[])rects.Clone();
+					var test2IsPositioned = (bool[])isPositioned.Clone();
+					test2Rects[i].X = xmin;
+					test2Rects[i].Y = ymin;
+					test2IsPositioned[i] = true;
 
 					// Fill the area on the right.
 					FillBoundedArea(xmin + rects[i].Width, xmax, ymin, ymax,
-						ref test2_num_unpositioned, ref test2_rects, ref test2_is_positioned);
+						ref test2NumUnpositioned, ref test2Rects, ref test2IsPositioned);
 					// Fill the area on the bottom.
 					FillBoundedArea(xmin, xmin + rects[i].Width, ymin + rects[i].Height, ymax,
-						ref test2_num_unpositioned, ref test2_rects, ref test2_is_positioned);
+						ref test2NumUnpositioned, ref test2Rects, ref test2IsPositioned);
 
 					// Learn about the test solution.
-					double test2_density =
+					double test2Density =
 						SolutionDensity(
 							xmin + rects[i].Width, xmax, ymin, ymax,
 							xmin, xmin + rects[i].Width, ymin + rects[i].Height, ymax,
-							test2_rects, test2_is_positioned);
+							test2Rects, test2IsPositioned);
 
 					// See if this is better than the current best solution.
-					if (test2_density >= best_density) {
+					if (test2Density >= bestDensity) {
 						// The test is better. Save it.
-						best_density = test2_density;
-						best_rects = test2_rects;
-						best_is_positioned = test2_is_positioned;
-						best_num_unpositioned = test2_num_unpositioned;
+						bestDensity = test2Density;
+						bestRects = test2Rects;
+						bestIsPositioned = test2IsPositioned;
+						bestNumUnpositioned = test2NumUnpositioned;
 					}
 				} // End trying this rectangle.
 			} // End looping through the rectangles.
 
 			// Return the best solution we found.
-			is_positioned = best_is_positioned;
-			num_unpositioned = best_num_unpositioned;
-			rects = best_rects;
+			isPositioned = bestIsPositioned;
+			numUnpositioned = bestNumUnpositioned;
+			rects = bestRects;
 		}
 
 		// Find the density of the rectangles in the given areas for this solution.
 		private double SolutionDensity (
 			int xmin1, int xmax1, int ymin1, int ymax1,
 			int xmin2, int xmax2, int ymin2, int ymax2,
-			Rectangle[] rects, bool[] is_positioned) {
+			Rectangle[] rects, bool[] isPositioned) {
 			var rect1 = new Rectangle(xmin1, ymin1, xmax1 - xmin1, ymax1 - ymin1);
 			var rect2 = new Rectangle(xmin2, ymin2, xmax2 - xmin2, ymax2 - ymin2);
-			int area_covered = 0;
+			int areaCovered = 0;
 			for (int i = 0; i <= rects.Length - 1; i++) {
-				if (is_positioned[i] &&
+				if (isPositioned[i] &&
 					(rects[i].IntersectsWith(rect1) ||
 					 rects[i].IntersectsWith(rect2))) {
-					area_covered += rects[i].Width * rects[i].Height;
+					areaCovered += rects[i].Width * rects[i].Height;
 				}
 			}
 
 			double denom = rect1.Width * rect1.Height + rect2.Width * rect2.Height;
 			if (Math.Abs(denom) < 0.001) return 0;
 
-			return area_covered / denom;
+			return areaCovered / denom;
 		}
 
 		private class HeightComparer : IComparer {

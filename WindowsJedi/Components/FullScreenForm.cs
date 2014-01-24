@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
+using WindowsJedi.WinApis;
 
 namespace WindowsJedi.Components {
 	public class FullScreenForm : Form {

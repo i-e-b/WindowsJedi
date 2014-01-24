@@ -3,42 +3,36 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WindowsJedi.Components;
 using WindowsJedi.Properties;
+using WindowsJedi.UserInterface;
 
 namespace WindowsJedi {
 	static class Program {
-		public static HotkeyCore hotKeys;
-		private static NotifyTrayApp notify;
-		private static DummyForm dummyForm;
+        public static NotifyTrayApp Notify;
+        public static DummyForm DummyForm;
 
-		private static ConcentrationForm concentrationForm;
-		private static SwitcherForm switcherForm;
 
 		[STAThread]
 		static void Main () {
 			InitialiseWinForms();
 
-			concentrationForm = new ConcentrationForm();
-			switcherForm = new SwitcherForm();
+            using (var switcherForm = new SwitcherForm())
+            using (var concentrationForm = new ConcentrationForm())
+            using (var hotKeys = new HotkeyCore())
+            {
+// ReSharper disable AccessToDisposedClosure
+                hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
+                hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
+// ReSharper restore AccessToDisposedClosure
 
-			hotKeys = new HotkeyCore();
-            Action toggleSwitcher = () => switcherForm.Toggle();
-            Action toggleConcentration = () => concentrationForm.Toggle();
+                Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "http://snippetsfor.net/WindowsJedi");
+                Notify.AddMenuItem("Settings", delegate { (new UserInterface.Settings()).ShowDialog(); });
 
-            var pin1 = GCHandle.Alloc(toggleSwitcher);
-            var pin2 = GCHandle.Alloc(toggleConcentration);
+                Application.ThreadException += Application_ThreadException;
 
-            hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, toggleSwitcher);
-            hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, toggleConcentration);
+                Application.Run();
 
-			notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "http://snippetsfor.net/WindowsJedi");
-			notify.AddMenuItem("Settings", delegate { (new UserInterface.Settings()).ShowDialog(); });
-
-			Application.ThreadException += Application_ThreadException;
-
-			Application.Run();
-
-            pin1.Free();
-            pin2.Free();
+            }
+            DummyForm.Dispose();
 		}
 
 		static void Application_ThreadException (object sender, System.Threading.ThreadExceptionEventArgs e) {
@@ -47,9 +41,9 @@ namespace WindowsJedi {
 		private static void InitialiseWinForms() {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			dummyForm = new DummyForm();
-			dummyForm.Show();
-			dummyForm.Hide();
+			DummyForm = new DummyForm();
+			DummyForm.Show();
+			DummyForm.Hide();
 		}
 
 	}

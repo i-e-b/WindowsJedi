@@ -1,27 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using WindowsJedi.Components;
 
-namespace WindowsJedi {
-	public class KeyHookManager {
-		private readonly HashSet<Keys> keyboardState;
+namespace WindowsJedi.WinApis {
+    /// <summary>
+    /// Exposes key press events from early in the event lifecycle,
+    /// allowing interception of system key presses
+    /// </summary>
+    public class KeyHookManager : CriticalFinalizerObject, IDisposable
+    {
+		readonly HashSet<Keys> _keyboardState;
 	    readonly Win32.HookProc _keyboardHookProcedure;
-	    private GCHandle _pin1;
+	    GCHandle _keyboardHookProcPin;
+        DateTime _lastRefresh; // not monotonic, but hopefully not a problem.
 
 		public KeyHookManager () {
-			keyboardState = new HashSet<Keys>();
+			_keyboardState = new HashSet<Keys>();
 			_keyboardHookProcedure = KeyboardHookProc;
-            _pin1 = GCHandle.Alloc(_keyboardHookProcedure);
+            _keyboardHookProcPin = GCHandle.Alloc(_keyboardHookProcedure);
 			Start();
 		}
 
 		~KeyHookManager () {
-			Stop();
-            _pin1.Free();
+            Dispose(false);
 		}
+        protected virtual void Dispose(bool disposing)
+        {
+            Stop();
+            if (_keyboardHookProcPin.IsAllocated) _keyboardHookProcPin.Free();
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
 		public event KeyEventHandler KeyDown;
 		public event KeyPressEventHandler KeyPress;
@@ -38,18 +53,26 @@ namespace WindowsJedi {
 			public int dwExtraInfo; // Specifies extra information associated with the message. 
 		}
 
-		public void Start () {
-			using (Process curProcess = Process.GetCurrentProcess())
-			using (ProcessModule curModule = curProcess.MainModule) {
+        /// <summary>
+        /// Start listening for key presses
+        /// </summary>
+        public void Start()
+        {
+            _lastRefresh = DateTime.UtcNow;
+			using (var curProcess = Process.GetCurrentProcess())
+			using (var curModule = curProcess.MainModule) {
 				_hKeyboardHook = Win32.SetWindowsHookEx(Win32.WH_KEYBOARD_LL, _keyboardHookProcedure,
 					Win32.GetModuleHandle(curModule.ModuleName), 0);
 			}
-			if (_hKeyboardHook == 0) {
-				Stop();
-				throw new Exception("SetWindowsHookEx startup failed.");
-			}
+		    if (_hKeyboardHook != 0) return;
+
+		    Stop();
+		    throw new Exception("SetWindowsHookEx startup failed.");
 		}
 
+        /// <summary>
+        /// Stop listening for key presses
+        /// </summary>
 		public void Stop () {
 			if (_hKeyboardHook == 0) return;
 			Win32.UnhookWindowsHookEx(_hKeyboardHook);
@@ -63,16 +86,24 @@ namespace WindowsJedi {
 		}
 
 		public bool IsKeyComboPressed(Keys[] combo) {
-			return keyboardState.SetEquals(combo);
+			return _keyboardState.SetEquals(combo);
 		}
 
-		private int KeyboardHookProc (int nCode, Int32 wParam, IntPtr lParam) {
+        private int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
+        {
+            // If the keyboard hasn't been refreshed in a while, assume that all the keys are up.
+            if (DateTime.UtcNow - _lastRefresh > TimeSpan.FromSeconds(2))  // hopefully your fingers aren't too slow.
+            {
+                _keyboardState.Clear();
+            }
+            _lastRefresh = DateTime.UtcNow;
+
 			bool suppressKeyPress = false;
 			if ((nCode >= 0) && (KeyDown != null || KeyUp != null || KeyPress != null)) {
-				var MyKeyboardHookStruct = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
+				var hook = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
 				if (wParam == Win32.WM_KEYDOWN || wParam == Win32.WM_SYSKEYDOWN) {
-					var keyData = (Keys)MyKeyboardHookStruct.vkCode;
-					keyboardState.Add(keyData);
+					var keyData = (Keys)hook.vkCode;
+					_keyboardState.Add(keyData);
 
 					if (KeyDown != null) {
 						var e = new KeyEventArgs(keyData);
@@ -86,11 +117,11 @@ namespace WindowsJedi {
 					Win32.GetKeyboardState(keyState);
 
 					var inBuffer = new byte[2];
-					if (Win32.ToAscii(MyKeyboardHookStruct.vkCode,
-							MyKeyboardHookStruct.scanCode,
+					if (Win32.ToAscii(hook.vkCode,
+							hook.scanCode,
 							keyState,
 							inBuffer,
-							MyKeyboardHookStruct.flags) == 1) {
+							hook.flags) == 1) {
 						var e = new KeyPressEventArgs((char)inBuffer[0]);
 						KeyPress(this, e);
 						suppressKeyPress |= e.Handled;
@@ -98,8 +129,8 @@ namespace WindowsJedi {
 				}
 
 				if (wParam == Win32.WM_KEYUP || wParam == Win32.WM_SYSKEYUP) {
-					var keyData = (Keys)MyKeyboardHookStruct.vkCode;
-					keyboardState.Remove(keyData);
+					var keyData = (Keys)hook.vkCode;
+					_keyboardState.Remove(keyData);
 
 					if (KeyUp != null) {
 						var e = new KeyEventArgs(keyData);

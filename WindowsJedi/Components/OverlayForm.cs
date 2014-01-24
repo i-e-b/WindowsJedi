@@ -2,9 +2,9 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
-using WindowsJedi.Components;
+using WindowsJedi.WinApis;
 
-namespace WindowsJedi {
+namespace WindowsJedi.Components {
 	public class OverlayForm : Form {
 		/// <summary>
 		/// Set overlay bitmap

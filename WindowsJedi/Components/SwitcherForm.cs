@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using WindowsJedi.Algorithms;
+using WindowsJedi.WinApis;
 
 namespace WindowsJedi.Components {
 	/// <summary>
@@ -32,10 +33,13 @@ namespace WindowsJedi.Components {
 			windows = new List<Window>();
 		}
 
-		~SwitcherForm () {
+        protected override void Dispose(bool disposing)
+        {
 			keyMgr.Stop();
+            keyMgr.Dispose();
 			HideSwitcher();
-		}
+            base.Dispose(disposing);
+        }
 
 		/// <summary>
 		/// Show or hide the switcher window.
@@ -182,7 +186,6 @@ namespace WindowsJedi.Components {
 
 					i++;
 				}
-				g.Dispose();
 			}
 		}
 

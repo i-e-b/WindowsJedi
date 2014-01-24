@@ -26,7 +26,6 @@ Todo / Bugs
  * Win-Tab in focus mode should switch focus to selected window
  * Win-Tab doesn't handle maximised windows well if their 'restored' size is significantly different
  * Focus mode isn't strict enough. Should be more like switcher with only one item
- * Window hooks are gc pinned - need to go through and carefully check disposal and ensure no memory leaks
 
 Interesting code features
 -------------------------

@@ -5,9 +5,68 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
 
-namespace WindowsJedi.Components {
+namespace WindowsJedi.WinApis {
+    /// <summary>
+    /// Wrapper around Win32 desktops api
+    /// </summary>
 	public class Desktop : IDisposable, ICloneable {
-		#region Imports
+
+        /// <summary>
+        /// Creates a new Desktop object.
+        /// </summary>
+        public Desktop()
+        {
+            // init variables.
+            m_desktop = IntPtr.Zero;
+            m_desktopName = String.Empty;
+            m_windows = new ArrayList();
+            m_disposed = false;
+        }
+
+        // constructor is private to prevent invalid handles being passed to it.
+        private Desktop(IntPtr desktop)
+        {
+            // init variables.
+            m_desktop = desktop;
+            m_desktopName = Desktop.GetDesktopName(desktop);
+            m_windows = new ArrayList();
+            m_disposed = false;
+        }
+
+        ~Desktop()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Dispose Object.
+        /// </summary>
+        public void Dispose()
+        {
+            // dispose
+            Dispose(true);
+
+            // suppress finalisation
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose Object.
+        /// </summary>
+        /// <param name="disposing">True to dispose managed resources.</param>
+        public virtual void Dispose(bool disposing)
+        {
+            if (!m_disposed)
+            {
+                // dispose of managed resources,
+                // close handles
+                Close();
+            }
+
+            m_disposed = true;
+        }
+
+        #region Imports
 		[DllImport("kernel32.dll")]
 		private static extern int GetThreadId (IntPtr thread);
 
@@ -247,32 +306,6 @@ namespace WindowsJedi.Components {
 		public static readonly Desktop Input = Desktop.OpenInputDesktop();
 		#endregion
 
-		#region Construction/Destruction
-		/// <summary>
-		/// Creates a new Desktop object.
-		/// </summary>
-		public Desktop () {
-			// init variables.
-			m_desktop = IntPtr.Zero;
-			m_desktopName = String.Empty;
-			m_windows = new ArrayList();
-			m_disposed = false;
-		}
-
-		// constructor is private to prevent invalid handles being passed to it.
-		private Desktop (IntPtr desktop) {
-			// init variables.
-			m_desktop = desktop;
-			m_desktopName = Desktop.GetDesktopName(desktop);
-			m_windows = new ArrayList();
-			m_disposed = false;
-		}
-
-		~Desktop () {
-			// clean up, close the desktop.
-			Close();
-		}
-		#endregion
 
 		#region Methods
 		/// <summary>
@@ -282,9 +315,8 @@ namespace WindowsJedi.Components {
 		/// <returns>True if desktop was successfully created, otherwise false.</returns>
 		public bool Create (string name) {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// close the open desktop.
+		    // close the open desktop.
 			if (m_desktop != IntPtr.Zero) {
 				// attempt to close the desktop.
 				if (!Close()) return false;
@@ -313,9 +345,8 @@ namespace WindowsJedi.Components {
 		/// <returns>True if an open handle was successfully closed.</returns>
 		public bool Close () {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// check there is a desktop open.
+		    // check there is a desktop open.
 			if (m_desktop != IntPtr.Zero) {
 				// close the desktop.
 				bool result = CloseDesktop(m_desktop);
@@ -340,9 +371,8 @@ namespace WindowsJedi.Components {
 		/// <returns>True if the desktop was successfully opened.</returns>
 		public bool Open (string name) {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// close the open desktop.
+		    // close the open desktop.
 			if (m_desktop != IntPtr.Zero) {
 				// attempt to close the desktop.
 				if (!Close()) return false;
@@ -365,9 +395,8 @@ namespace WindowsJedi.Components {
 		/// <returns>True if the desktop was succesfully opened.</returns>
 		public bool OpenInput () {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// close the open desktop.
+		    // close the open desktop.
 			if (m_desktop != IntPtr.Zero) {
 				// attempt to close the desktop.
 				if (!Close()) return false;
@@ -391,9 +420,8 @@ namespace WindowsJedi.Components {
 		/// <returns>True if desktops were successfully switched.</returns>
 		public bool Show () {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// make sure there is a desktop to open.
+		    // make sure there is a desktop to open.
 			if (m_desktop == IntPtr.Zero) return false;
 
 			// attempt to switch desktops.
@@ -405,13 +433,11 @@ namespace WindowsJedi.Components {
 		/// <summary>
 		/// Enumerates the windows on a desktop.
 		/// </summary>
-		/// <param name="windows">Array of Desktop.Window objects to recieve windows.</param>
 		/// <returns>A window colleciton if successful, otherwise null.</returns>
 		public WindowCollection GetWindows () {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// make sure a desktop is open.
+		    // make sure a desktop is open.
 			if (!IsOpen) return null;
 
 			// init the arraylist.
@@ -453,9 +479,8 @@ namespace WindowsJedi.Components {
 		/// <returns>The process object for the newly created process.</returns>
 		public Process CreateProcess (string path) {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// make sure a desktop is open.
+		    // make sure a desktop is open.
 			if (!IsOpen) return null;
 
 			// set startup parameters.
@@ -480,9 +505,8 @@ namespace WindowsJedi.Components {
 		/// </summary>
 		public void Prepare () {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			// make sure a desktop is open.
+		    // make sure a desktop is open.
 			if (IsOpen) {
 				// load explorer.
 				CreateProcess("explorer.exe");
@@ -494,8 +518,6 @@ namespace WindowsJedi.Components {
 		/// <summary>
 		/// Enumerates all of the desktops.
 		/// </summary>
-		/// <param name="desktops">String array to recieve desktop names.</param>
-		/// <returns>True if desktop names were successfully enumerated.</returns>
 		public static string[] GetDesktops () {
 			// attempt to enum desktops.
 			IntPtr windowStation = GetProcessWindowStation();
@@ -555,7 +577,7 @@ namespace WindowsJedi.Components {
 		/// <returns>Returns a Desktop object for the valling thread.</returns>
 		public static Desktop GetCurrent () {
 			// get the desktop.
-			return new Desktop(GetThreadDesktop(AppDomain.GetCurrentThreadId()));
+			return new Desktop(GetThreadDesktop(Thread.CurrentThread.ManagedThreadId));
 		}
 
 		/// <summary>
@@ -747,40 +769,6 @@ namespace WindowsJedi.Components {
 		}
 		#endregion
 
-		#region IDisposable
-		/// <summary>
-		/// Dispose Object.
-		/// </summary>
-		public void Dispose () {
-			// dispose
-			Dispose(true);
-
-			// suppress finalisation
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Dispose Object.
-		/// </summary>
-		/// <param name="disposing">True to dispose managed resources.</param>
-		public virtual void Dispose (bool disposing) {
-			if (!m_disposed) {
-				// dispose of managed resources,
-				// close handles
-				Close();
-			}
-
-			m_disposed = true;
-		}
-
-		private void CheckDisposed () {
-			// check if disposed
-			if (m_disposed) {
-				// object disposed, throw exception
-				throw new ObjectDisposedException("");
-			}
-		}
-		#endregion
 
 		#region ICloneable
 		/// <summary>
@@ -789,9 +777,8 @@ namespace WindowsJedi.Components {
 		/// <returns>Cloned desktop object.</returns>
 		public object Clone () {
 			// make sure object isnt disposed.
-			CheckDisposed();
 
-			Desktop desktop = new Desktop();
+		    Desktop desktop = new Desktop();
 
 			// if a desktop is open, make the clone open it.
 			if (IsOpen) desktop.Open(m_desktopName);

@@ -39,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -48,6 +49,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Resources\JediIcon.ico</ApplicationIcon>
@@ -70,7 +72,7 @@
     <Compile Include="Components\ConcentrationForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Components\Desktop.cs" />
+    <Compile Include="WinApis\Desktop.cs" />
     <Compile Include="Components\DummyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,18 +85,18 @@
     <Compile Include="Components\SwitcherForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Components\Window.cs" />
-    <Compile Include="Components\WindowEnumeration.cs" />
-    <Compile Include="Components\WindowHookManager.cs" />
+    <Compile Include="WinApis\Window.cs" />
+    <Compile Include="WinApis\WindowEnumeration.cs" />
+    <Compile Include="WinApis\WindowHookManager.cs" />
     <Compile Include="HotkeyCore.cs" />
-    <Compile Include="Components\KeyHookManager.cs" />
+    <Compile Include="WinApis\KeyHookManager.cs" />
     <Compile Include="Components\OverlayForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Components\Win32.cs" />
-    <Compile Include="Components\NotifyTrayApp.cs" />
+    <Compile Include="WinApis\Win32.cs" />
+    <Compile Include="UserInterface\NotifyTrayApp.cs" />
     <Compile Include="UserInterface\Settings.cs">
       <SubType>Form</SubType>
     </Compile>

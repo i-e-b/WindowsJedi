@@ -5,7 +5,7 @@ using System.Collections.Generic;
 // Seems like the DWM only wants to do the compositing itself.
 // Need to change this to a form, and register several thumbnails at once.
 
-namespace WindowsJedi.Components {
+namespace WindowsJedi.WinApis {
 	public static class WindowEnumeration {
 		private static readonly List<Window> Windows = new List<Window>();
 

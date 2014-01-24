@@ -1,4 +1,4 @@
-﻿namespace WindowsJedi {
+﻿namespace WindowsJedi.Components {
 	partial class DummyForm {
 		/// <summary>
 		/// Required designer variable.

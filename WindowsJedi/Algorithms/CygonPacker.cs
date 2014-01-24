@@ -24,8 +24,8 @@ namespace WindowsJedi.Algorithms {
 		/// <param name="packingAreaWidth">Width of the packing area</param>
 		/// <param name="packingAreaHeight">Height of the packing area</param>
 		protected RectanglePacker (int packingAreaWidth, int packingAreaHeight) {
-			this.packingAreaWidth = packingAreaWidth;
-			this.packingAreaHeight = packingAreaHeight;
+			_packingAreaWidth = packingAreaWidth;
+			_packingAreaHeight = packingAreaHeight;
 		}
 
 		/// <summary>Allocates space for a rectangle in the packing area</summary>
@@ -52,21 +52,22 @@ namespace WindowsJedi.Algorithms {
 
 		/// <summary>Maximum width the packing area is allowed to have</summary>
 		protected int PackingAreaWidth {
-			get { return packingAreaWidth; }
+			get { return _packingAreaWidth; }
 		}
 
 		/// <summary>Maximum height the packing area is allowed to have</summary>
 		protected int PackingAreaHeight {
-			get { return packingAreaHeight; }
+			get { return _packingAreaHeight; }
 		}
 
 		/// <summary>Maximum allowed width of the packing area</summary>
-		private readonly int packingAreaWidth;
+		private readonly int _packingAreaWidth;
 		/// <summary>Maximum allowed height of the packing area</summary>
-		private readonly int packingAreaHeight;
+		private readonly int _packingAreaHeight;
 
 	}
 
+    [Serializable]
 	public class OutOfSpaceException : Exception {
 		public OutOfSpaceException(string message) :base(message){}
 	}
@@ -119,7 +120,7 @@ namespace WindowsJedi.Algorithms {
 		public CygonRectanglePacker (int packingAreaWidth, int packingAreaHeight) :
 			base(packingAreaWidth, packingAreaHeight) {
 
-			heightSlices = new List<Point>{new Point(0, 0)};
+			_heightSlices = new List<Point>{new Point(0, 0)};
 
 			// At the beginning, the packing area is a single slice of height 0
 		}
@@ -142,12 +143,12 @@ namespace WindowsJedi.Algorithms {
 			}
 
 			// Determine the placement for the new rectangle
-			bool fits = tryFindBestPlacement(rectangleWidth, rectangleHeight, out placement);
+			bool fits = TryFindBestPlacement(rectangleWidth, rectangleHeight, out placement);
 
 			// If a place for the rectangle could be found, update the height slice table to
 			// mark the region of the rectangle as being taken.
 			if (fits)
-				integrateRectangle(placement.X, rectangleWidth, placement.Y + rectangleHeight);
+				IntegrateRectangle(placement.X, rectangleWidth, placement.Y + rectangleHeight);
 
 			return fits;
 		}
@@ -157,7 +158,7 @@ namespace WindowsJedi.Algorithms {
 		/// <param name="rectangleHeight">Height of the rectangle to find a position for</param>
 		/// <param name="placement">Receives the best placement found for the rectangle</param>
 		/// <returns>True if a valid placement for the rectangle could be found</returns>
-		private bool tryFindBestPlacement (
+		private bool TryFindBestPlacement (
 		  int rectangleWidth, int rectangleHeight, out Point placement
 		) {
 			int bestSliceIndex = -1; // Slice index where the best placement was found
@@ -171,21 +172,21 @@ namespace WindowsJedi.Algorithms {
 
 			// Determine the slice in which the right end of the rectangle is located when
 			// the rectangle is placed at the far left of the packing area.
-			int rightSliceIndex = heightSlices.BinarySearch(
+			int rightSliceIndex = _heightSlices.BinarySearch(
 			  new Point(rectangleWidth, 0), SliceStartComparer.Default
 			);
 			if (rightSliceIndex < 0)
 				rightSliceIndex = ~rightSliceIndex;
 
-			while (rightSliceIndex <= heightSlices.Count) {
+			while (rightSliceIndex <= _heightSlices.Count) {
 
 				// Determine the highest slice within the slices covered by the rectangle at
 				// its current placement. We cannot put the rectangle any lower than this without
 				// overlapping the other rectangles.
-				int highest = heightSlices[leftSliceIndex].Y;
+				int highest = _heightSlices[leftSliceIndex].Y;
 				for (int index = leftSliceIndex + 1; index < rightSliceIndex; ++index)
-					if (heightSlices[index].Y > highest)
-						highest = heightSlices[index].Y;
+					if (_heightSlices[index].Y > highest)
+						highest = _heightSlices[index].Y;
 
 				// Only process this position if it doesn't leave the packing area
 				if ((highest + rectangleHeight <= PackingAreaHeight)) {
@@ -200,27 +201,24 @@ namespace WindowsJedi.Algorithms {
 
 				// Advance the starting slice to the next slice start
 				++leftSliceIndex;
-				if (leftSliceIndex >= heightSlices.Count)
+				if (leftSliceIndex >= _heightSlices.Count)
 					break;
 
 				// Advance the ending slice until we're on the proper slice again, given the new
 				// starting position of the rectangle.
-				int rightRectangleEnd = heightSlices[leftSliceIndex].X + rectangleWidth;
-				for (; rightSliceIndex <= heightSlices.Count; ++rightSliceIndex) {
-					int rightSliceStart;
-					if (rightSliceIndex == heightSlices.Count)
-						rightSliceStart = PackingAreaWidth;
-					else
-						rightSliceStart = heightSlices[rightSliceIndex].X;
+				int rightRectangleEnd = _heightSlices[leftSliceIndex].X + rectangleWidth;
+				for (; rightSliceIndex <= _heightSlices.Count; ++rightSliceIndex)
+				{
+				    int rightSliceStart = rightSliceIndex == _heightSlices.Count ? PackingAreaWidth : _heightSlices[rightSliceIndex].X;
 
-					// Is this the slice we're looking for?
+				    // Is this the slice we're looking for?
 					if (rightSliceStart > rightRectangleEnd)
 						break;
 				}
 
-				// If we crossed the end of the slice array, the rectangle's right end has left
+			    // If we crossed the end of the slice array, the rectangle's right end has left
 				// the packing area, and thus, our search ends.
-				if (rightSliceIndex > heightSlices.Count)
+				if (rightSliceIndex > _heightSlices.Count)
 					break;
 
 			} // while rightSliceIndex <= this.heightSlices.Count
@@ -232,7 +230,7 @@ namespace WindowsJedi.Algorithms {
 				placement = Point.Empty;
 				return false;
 			}
-			placement = new Point(heightSlices[bestSliceIndex].X, bestSliceY);
+			placement = new Point(_heightSlices[bestSliceIndex].X, bestSliceY);
 			return true;
 		}
 
@@ -240,10 +238,10 @@ namespace WindowsJedi.Algorithms {
 		/// <param name="left">Position of the rectangle's left side</param>
 		/// <param name="width">Width of the rectangle</param>
 		/// <param name="bottom">Position of the rectangle's lower side</param>
-		private void integrateRectangle (int left, int width, int bottom) {
+		private void IntegrateRectangle (int left, int width, int bottom) {
 
 			// Find the first slice that is touched by the rectangle
-			int startSlice = heightSlices.BinarySearch(
+			int startSlice = _heightSlices.BinarySearch(
 			  new Point(left, 0), SliceStartComparer.Default
 			);
 
@@ -254,8 +252,8 @@ namespace WindowsJedi.Algorithms {
 			);
 
 			// We scored a direct hit, so we can replace the slice we have hit
-			int firstSliceOriginalHeight = heightSlices[startSlice].Y;
-			heightSlices[startSlice] = new Point(left, bottom);
+			int firstSliceOriginalHeight = _heightSlices[startSlice].Y;
+			_heightSlices[startSlice] = new Point(left, bottom);
 
 			int right = left + width;
 			++startSlice;
@@ -264,25 +262,25 @@ namespace WindowsJedi.Algorithms {
 			// use the start slice + 1 for the binary search and the possibly already
 			// modified start slice height now only remains in our temporary
 			// firstSliceOriginalHeight variable
-			if (startSlice >= heightSlices.Count) {
+			if (startSlice >= _heightSlices.Count) {
 
 				// If the slice ends within the last slice (usual case, unless it has the
 				// exact same width the packing area has), add another slice to return to
 				// the original height at the end of the rectangle.
 				if (right < PackingAreaWidth)
-					heightSlices.Add(new Point(right, firstSliceOriginalHeight));
+					_heightSlices.Add(new Point(right, firstSliceOriginalHeight));
 
 			} else { // The rectangle doesn't start on the last slice
 
-				int endSlice = heightSlices.BinarySearch(
-				  startSlice, heightSlices.Count - startSlice,
+				int endSlice = _heightSlices.BinarySearch(
+				  startSlice, _heightSlices.Count - startSlice,
 				  new Point(right, 0), SliceStartComparer.Default
 				);
 
 				// Another direct hit on the final slice's end?
 				if (endSlice > 0) {
 
-					heightSlices.RemoveRange(startSlice, endSlice - startSlice);
+					_heightSlices.RemoveRange(startSlice, endSlice - startSlice);
 
 				} else { // No direct hit, rectangle ends inside another slice
 
@@ -291,17 +289,13 @@ namespace WindowsJedi.Algorithms {
 
 					// Find out to which height we need to return at the right end of
 					// the rectangle
-					int returnHeight;
-					if (endSlice == startSlice)
-						returnHeight = firstSliceOriginalHeight;
-					else
-						returnHeight = heightSlices[endSlice - 1].Y;
+				    int returnHeight = endSlice == startSlice ? firstSliceOriginalHeight : _heightSlices[endSlice - 1].Y;
 
 					// Remove all slices covered by the rectangle and begin a new slice at its end
 					// to return back to the height of the slice on which the rectangle ends.
-					heightSlices.RemoveRange(startSlice, endSlice - startSlice);
+					_heightSlices.RemoveRange(startSlice, endSlice - startSlice);
 					if (right < PackingAreaWidth)
-						heightSlices.Insert(startSlice, new Point(right, returnHeight));
+						_heightSlices.Insert(startSlice, new Point(right, returnHeight));
 
 				} // if endSlice > 0
 
@@ -310,7 +304,7 @@ namespace WindowsJedi.Algorithms {
 		}
 
 		/// <summary>Stores the height silhouette of the rectangles</summary>
-		private readonly List<Point> heightSlices;
+		private readonly List<Point> _heightSlices;
 
 	}
 
