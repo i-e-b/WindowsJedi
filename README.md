@@ -10,8 +10,8 @@ Windows 7 with Aero enabled. Doesn't work without Aero features.
 
 What it does
 ------------
- 1) Replace Win-Tab with something more useful (a bit like expose, but with a significantly different way of packing and selecting)
- 2) Focus-mode: dim other windows and make a best effort to prevent the focus-stealing that plagues Windows
+ 1. Replace Win-Tab with something more useful (a bit like expose, but with a significantly different way of packing and selecting)
+ 2. Focus-mode: dim other windows and make a best effort to prevent the focus-stealing that plagues Windows
  
 Planned
 -------
@@ -23,6 +23,7 @@ Planned
 
 Todo / Bugs
 -----------
+ * Win-Tab in focus mode should switch focus to selected window
  * Win-Tab doesn't handle maximised windows well if their 'restored' size is significantly different
  * Focus mode isn't strict enough. Should be more like switcher with only one item
  * Window hooks are gc pinned - need to go through and carefully check disposal and ensure no memory leaks
