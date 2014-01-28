@@ -63,6 +63,7 @@ namespace WindowsJedi.Components {
 			}
 		}
 
+
 		protected override void WndProc (ref Message m) {
 			if (m.Msg >= 0x201 && m.Msg <= 0x209) { // We've been clicked on
 				UnConcentrate();
@@ -75,20 +76,22 @@ namespace WindowsJedi.Components {
         /// <summary>
         /// Event handler tries to force focused window to the front
         /// </summary>
-		void winHook_WindowFocusChanged (object sender, WindowFocusChangedEventArgs e) {
-			if (!Win32.LockSetForegroundWindow(Win32.LSFW_UNLOCK)) {}
-			if (_locking && (e.WindowHandle != Handle) && (e.WindowHandle != _currentWindow)) {
-				SuspendLayout();
-				TopMost = true;
-				Win32.BringWindowToTop(Handle);
-				Win32.SetForegroundWindow(Handle);
-				TopMost = false;
-				Win32.BringWindowToTop(_currentWindow);
-				Win32.SetForegroundWindow(_currentWindow);
-				ResumeLayout(false);
-			}
-			if (!Win32.LockSetForegroundWindow(Win32.LSFW_LOCK)) {}
-		}
+        void winHook_WindowFocusChanged(object sender, WindowFocusChangedEventArgs e)
+        {
+            if (!Win32.LockSetForegroundWindow(Win32.LSFW_UNLOCK)) { }
+            if (_locking && (e.WindowHandle != Handle) && (e.WindowHandle != _currentWindow))
+            {
+                SuspendLayout();
+                TopMost = true;
+                Win32.BringWindowToTop(Handle);
+                Win32.SetForegroundWindow(Handle);
+                TopMost = false;
+                Win32.BringWindowToTop(_currentWindow);
+                Win32.SetForegroundWindow(_currentWindow);
+                ResumeLayout(false);
+            }
+            if (!Win32.LockSetForegroundWindow(Win32.LSFW_LOCK)) { }
+        }
 
 		private void ConcentrateFadeIn () {
 			Opacity = 0;

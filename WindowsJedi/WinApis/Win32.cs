@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using WindowsJedi.WinApis.Data;
+// ReSharper disable InconsistentNaming
 
 namespace WindowsJedi.WinApis {
     /// <summary>
@@ -187,8 +188,15 @@ namespace WindowsJedi.WinApis {
 		public const int WM_ACTIVATEAPP = 0x001C;
 		#endregion
 
-		#region Windows Hooks
-		public const int WH_KEYBOARD_LL = 13;
+        #region Hwnd positions
+        public static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
+        public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+        public static readonly IntPtr HWND_TOP = new IntPtr(0);
+        public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        #endregion
+
+        #region Windows Hooks
+        public const int WH_KEYBOARD_LL = 13;
 		public const int WH_CBT = 5;
 		#endregion
 
@@ -205,8 +213,13 @@ namespace WindowsJedi.WinApis {
 		public const int WS_EX_TOOLWINDOW = 0x80;
 		#endregion
 
-		#region Graphic Composition Flags
-		public const Int32 ULW_COLORKEY = 0x00000001;
+        #region Window positioning flags
+        public const uint SWP_NOSIZE = 0x0001;
+        public const uint SWP_NOMOVE = 0x0002;
+        #endregion
+
+        #region Graphic Composition Flags
+        public const Int32 ULW_COLORKEY = 0x00000001;
 		public const Int32 ULW_ALPHA = 0x00000002;
 		public const Int32 ULW_OPAQUE = 0x00000004;
 
@@ -298,6 +311,8 @@ namespace WindowsJedi.WinApis {
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindowLongPtr(IntPtr windowHandle, int nIndex);
 
+        [DllImport("user32.dll")]
+        public static extern bool SetWindowPos(IntPtr windowHandle, IntPtr insertAfterWindowHandle, int x, int y, int cx, int cy, uint flags);
 
         [DllImport("user32.dll")]
         public static extern bool RedrawWindow(IntPtr windowHandle, /*[In] ref Rect*/ IntPtr updateRect, IntPtr updateRegion, uint flags);

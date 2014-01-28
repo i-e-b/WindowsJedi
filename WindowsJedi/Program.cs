@@ -18,12 +18,14 @@ namespace WindowsJedi {
             using (var switcherForm = new SwitcherForm())
             using (var concentrationForm = new ConcentrationForm())
             using (var popupWindows = new PopupWindows())
+            using (var pushback = new Pushback())
             using (var hotKeys = new HotkeyCore())
             {
 // ReSharper disable AccessToDisposedClosure
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                 hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.Toggle);
+                hotKeys.Bind(new[] { Keys.LWin, Keys.Escape }, pushback.PushBackFrontWindow);
 // ReSharper restore AccessToDisposedClosure
 
                 Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "http://snippetsfor.net/WindowsJedi");
