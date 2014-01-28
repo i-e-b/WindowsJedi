@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using WindowsJedi.WinApis.Data;
 
 namespace WindowsJedi.WinApis {
-	/// <summary>
+    /// <summary>
 	/// A big pile of Win32 low level calls, constants and data types
 	/// </summary>
 	internal class Win32 {
@@ -213,16 +214,36 @@ namespace WindowsJedi.WinApis {
 		public const byte AC_SRC_ALPHA = 0x01;
 		#endregion
 
-		#region Windows Events Flags
-		public const int LSFW_LOCK = 1;
-		public const int LSFW_UNLOCK = 2;
-		public const int HCBT_SETFOCUS = 9;
+        #region Windows Events Flags
+        public const int LSFW_LOCK = 1;
+        public const int LSFW_UNLOCK = 2;
+        public const int HCBT_SETFOCUS = 9;
 
-		public const uint WINEVENT_OUTOFCONTEXT = 0;
-		public const uint EVENT_SYSTEM_FOREGROUND = 3;
-		#endregion
+        public const uint WINEVENT_OUTOFCONTEXT = 0;
+        public const uint EVENT_SYSTEM_FOREGROUND = 3;
+        #endregion
 
-		#region DWM flags
+        #region Window redraw flags
+        public const int RDW_INVALIDATE = 0x0001;
+        public const int RDW_INTERNALPAINT = 0x0002;
+        public const int RDW_ERASE = 0x0004;
+
+        public const int RDW_VALIDATE = 0x0008;
+        public const int RDW_NOINTERNALPAINT = 0x0010;
+        public const int RDW_NOERASE = 0x0020;
+
+        public const int RDW_NOCHILDREN = 0x0040;
+        public const int RDW_ALLCHILDREN = 0x0080;
+
+        public const int RDW_UPDATENOW = 0x0100;
+        public const int RDW_ERASENOW = 0x0200;
+
+        public const int RDW_FRAME = 0x0400;
+        public const int RDW_NOFRAME = 0x0800;
+        #endregion
+
+        #region DWM flags
+        public const int GWL_EXSTYLE = -20;
 		public const int GWL_STYLE = -16;
 		public const int DWM_TNP_VISIBLE = 0x8;
 		public const int DWM_TNP_OPACITY = 0x4;
@@ -250,6 +271,36 @@ namespace WindowsJedi.WinApis {
 		#region User 32
 		[DllImport("user32.dll")]
 		public static extern void keybd_event (byte key, byte scan, KeyboardInputFlags flags, IntPtr extraInfo);
+
+
+        /// <summary>
+        /// Set layered window. You must set the window layered first, using `SetWindowLong`
+        /// </summary>
+        /// <param name="windowHandle">Window handle</param>
+        /// <param name="crKey">color key (0x00RRGGBB)</param>
+        /// <param name="bAlpha">[0..255] alpha, 255 is opaque, 0 is transparent</param>
+        /// <param name="dwFlags">Use alpha or color key?</param>
+        /// <example><![CDATA[
+        /// // Set WS_EX_LAYERED on this window 
+        /// SetWindowLong(hwnd, 
+        ///               GWL_EXSTYLE, 
+        ///                GetWindowLong(hwnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+        ///
+        /// // Make this window 70% alpha
+        /// SetLayeredWindowAttributes(hwnd, 0, (255 * 70) / 100, LWA_ALPHA);
+        /// ]]></example>
+        [DllImport("user32.dll")]
+        public static extern bool SetLayeredWindowAttributes(IntPtr windowHandle, UInt32 crKey, byte bAlpha, LayeredWindowFlags dwFlags);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWindowLongPtr(IntPtr windowHandle, int nIndex, IntPtr newSettings);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindowLongPtr(IntPtr windowHandle, int nIndex);
+
+
+        [DllImport("user32.dll")]
+        public static extern bool RedrawWindow(IntPtr windowHandle, /*[In] ref Rect*/ IntPtr updateRect, IntPtr updateRegion, uint flags);
 
 		[DllImport("user32.dll", SetLastError = true)]
 		public static extern IntPtr FindWindow (string lpClassName, string lpWindowName);
@@ -373,5 +424,4 @@ namespace WindowsJedi.WinApis {
 		public delegate int HookProc (int nCode, Int32 wParam, IntPtr lParam);
 		#endregion
 	}
-
 }

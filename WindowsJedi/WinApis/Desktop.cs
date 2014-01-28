@@ -231,33 +231,7 @@ namespace WindowsJedi.WinApis {
 			#endregion
 		}
 
-		/// <summary>
-		/// A collection for Window objects.
-		/// </summary>
-		public class WindowCollection : CollectionBase {
-			#region Public Properties
-			/// <summary>
-			/// Gets a window from teh collection.
-			/// </summary>
-			public Window this[int index] {
-				get {
-					return (Window)List[index];
-				}
-			}
-			#endregion
-
-			#region Methods
-			/// <summary>
-			/// Adds a window to the collection.
-			/// </summary>
-			/// <param name="wnd">Window to add.</param>
-			public void Add (Window wnd) {
-				// adds a widow to the collection.
-				List.Add(wnd);
-			}
-			#endregion
-		}
-		#endregion
+        #endregion
 
 		#region Private Variables
 		private IntPtr m_desktop;

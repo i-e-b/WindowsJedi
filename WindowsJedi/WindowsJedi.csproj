@@ -57,14 +57,9 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\CygonPacker.cs" />
@@ -72,6 +67,7 @@
     <Compile Include="Components\ConcentrationForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Components\PopupWindows.cs" />
     <Compile Include="WinApis\Desktop.cs" />
     <Compile Include="Components\DummyForm.cs">
       <SubType>Form</SubType>
@@ -85,7 +81,9 @@
     <Compile Include="Components\SwitcherForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="WinApis\Data\LayeredWindowFlags.cs" />
     <Compile Include="WinApis\Window.cs" />
+    <Compile Include="WinApis\WindowCollection.cs" />
     <Compile Include="WinApis\WindowEnumeration.cs" />
     <Compile Include="WinApis\WindowHookManager.cs" />
     <Compile Include="HotkeyCore.cs" />

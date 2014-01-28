@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 using WindowsJedi.Components;
 using WindowsJedi.Properties;
@@ -17,11 +17,13 @@ namespace WindowsJedi {
 
             using (var switcherForm = new SwitcherForm())
             using (var concentrationForm = new ConcentrationForm())
+            using (var popupWindows = new PopupWindows())
             using (var hotKeys = new HotkeyCore())
             {
 // ReSharper disable AccessToDisposedClosure
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                 hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
+                hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.Toggle);
 // ReSharper restore AccessToDisposedClosure
 
                 Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "http://snippetsfor.net/WindowsJedi");
@@ -35,7 +37,7 @@ namespace WindowsJedi {
             DummyForm.Dispose();
 		}
 
-		static void Application_ThreadException (object sender, System.Threading.ThreadExceptionEventArgs e) {
+		static void Application_ThreadException (object sender, ThreadExceptionEventArgs e) {
 		}
 
 		private static void InitialiseWinForms() {

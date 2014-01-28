@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+using WindowsJedi.WinApis.Data;
 
 namespace WindowsJedi.WinApis {
     /// <summary>
@@ -114,6 +115,28 @@ namespace WindowsJedi.WinApis {
         }
 
         /// <summary>
+        /// Returns true if this window is a pop-up style.
+        /// </summary>
+        public bool IsPopup
+        {
+            get
+            {
+                return ((ulong)Win32.GetWindowLongPtr(_handle, Win32.GWL_STYLE).ToInt64() & Win32.WS_POPUP) != 0;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if this window is currently visible, false if hidden.
+        /// </summary>
+        public bool IsVisible
+        {
+            get
+            {
+                return ((ulong)Win32.GetWindowLongPtr(_handle, Win32.GWL_STYLE).ToInt64() & Win32.WS_VISIBLE) != 0;
+            }
+        }
+
+        /// <summary>
         /// Return approximate aspect ratio of the thumbnail DWM would show.
         /// </summary>
         public Size DwmThumbAspect()
@@ -180,5 +203,48 @@ namespace WindowsJedi.WinApis {
 			Win32.BringWindowToTop(_handle);
 			Win32.SetForegroundWindow(_handle);
 		}
+
+        /// <summary>
+        /// Set a window to layered and transparent[0..255]opaque
+        /// </summary>
+        public void SetTranslucent(byte translucency)
+        {// Set WS_EX_LAYERED on this window 
+            Win32.SetWindowLongPtr(_handle, Win32.GWL_EXSTYLE, new IntPtr(Win32.GetWindowLongPtr(_handle, Win32.GWL_EXSTYLE).ToInt32() | Win32.WS_EX_LAYERED));
+
+            // Make this window 70% alpha
+            Win32.SetLayeredWindowAttributes(_handle, 0, (255 * 70) / 100, LayeredWindowFlags.UseAlpha);
+
+            // Ask the window and its children to repaint
+            Win32.RedrawWindow(_handle, IntPtr.Zero, IntPtr.Zero, Win32.RDW_ERASE | Win32.RDW_INVALIDATE | Win32.RDW_FRAME | Win32.RDW_ALLCHILDREN);
+        }
+
+
+        /// <summary>
+        /// Set a window to non-layered and opaque
+        /// </summary>
+        public void SetOpaque()
+        {
+            // Remove WS_EX_LAYERED from this window styles
+            Win32.SetWindowLongPtr(_handle, Win32.GWL_EXSTYLE, new IntPtr(Win32.GetWindowLongPtr(_handle, Win32.GWL_EXSTYLE).ToInt32() & ~Win32.WS_EX_LAYERED));
+
+            // Ask the window and its children to repaint
+            Win32.RedrawWindow(_handle, IntPtr.Zero, IntPtr.Zero, Win32.RDW_ERASE | Win32.RDW_INVALIDATE | Win32.RDW_FRAME | Win32.RDW_ALLCHILDREN);
+        }
+
+        /// <summary>
+        /// Hide this window
+        /// </summary>
+        public void Hide()
+        {
+            Win32.ShowWindow(_handle, Win32.ShowWindowCommand.Hide);
+        }
+
+        /// <summary>
+        /// Show this window
+        /// </summary>
+        public void Show()
+        {
+            Win32.ShowWindow(_handle, Win32.ShowWindowCommand.Show);
+        }
 	}
 }
