@@ -132,7 +132,7 @@ namespace WindowsJedi.WinApis {
         {
             get
             {
-                return ((ulong)Win32.GetWindowLongPtr(_handle, Win32.GWL_STYLE).ToInt64() & Win32.WS_VISIBLE) != 0;
+                return WindowIsVisible(_handle);
             }
         }
 
@@ -200,6 +200,7 @@ namespace WindowsJedi.WinApis {
 				if (placement.ShowCmd == Win32.ShowWindowCommand.ShowMinimized)
 					Win32.ShowWindow(_handle, Win32.ShowWindowCommand.Restore);
 
+            Win32.SetActiveWindow(_handle);
 			Win32.BringWindowToTop(_handle);
 			Win32.SetForegroundWindow(_handle);
 		}
@@ -245,6 +246,41 @@ namespace WindowsJedi.WinApis {
         public void Show()
         {
             Win32.ShowWindow(_handle, Win32.ShowWindowCommand.Show);
+        }
+
+        public static Window ForegroundWindow()
+        {
+            var target = Win32.GetForegroundWindow();
+            return target == IntPtr.Zero ? null : new Window(target);
+        }
+
+        /// <summary>
+        /// Returns the next visible window below this one, or null if it's at the bottom
+        /// </summary>
+        public Window NextVisibleBelow()
+        {
+            if (_handle == IntPtr.Zero) return null;
+            var found = Win32.GetWindow(_handle, WindowStack.BelowTarget);
+
+            while (found != IntPtr.Zero)
+            {
+                if (WindowIsVisible(found)) return new Window(found);
+                found = Win32.GetWindow(found, WindowStack.BelowTarget);
+            }
+            return null;
+        }
+
+        private static bool WindowIsVisible(IntPtr target)
+        {
+            return ((ulong)Win32.GetWindowLongPtr(target, Win32.GWL_STYLE).ToInt64() & Win32.WS_VISIBLE) != 0;
+        }
+
+        /// <summary>
+        /// Leave window visible, but send it to the back of the z-order stack
+        /// </summary>
+        public void SendToBack()
+        {
+            Win32.SetWindowPos(_handle, Win32.HWND_BOTTOM, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE);
         }
 	}
 }

@@ -162,14 +162,6 @@ namespace WindowsJedi.WinApis {
 			public Size (Int32 cx, Int32 cy) { this.cx = cx; this.cy = cy; }
 		}
 
-		/*[StructLayout(LayoutKind.Sequential, Pack = 1)]
-		struct ARGB {
-			public byte Blue;
-			public byte Green;
-			public byte Red;
-			public byte Alpha;
-		}*/
-
 		[StructLayout(LayoutKind.Sequential, Pack = 1)]
 		public struct BLENDFUNCTION {
 			public byte BlendOp;
@@ -285,6 +277,17 @@ namespace WindowsJedi.WinApis {
 		[DllImport("user32.dll")]
 		public static extern void keybd_event (byte key, byte scan, KeyboardInputFlags flags, IntPtr extraInfo);
 
+        /// <summary>
+        /// Returns next window in requested z-order, or IntPtr.Zero if at the end.
+        /// </summary>
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindow(IntPtr targetWindow, WindowStack direction);
+
+        /// <summary>
+        /// Returns previous active window
+        /// </summary>
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetActiveWindow(IntPtr targetWindow);
 
         /// <summary>
         /// Set layered window. You must set the window layered first, using `SetWindowLong`

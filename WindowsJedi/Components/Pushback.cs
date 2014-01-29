@@ -1,8 +1,8 @@
-﻿using System;
-using WindowsJedi.WinApis;
-
-namespace WindowsJedi.Components
+﻿namespace WindowsJedi.Components
 {
+    using System;
+    using WindowsJedi.WinApis;
+
     /// <summary>
     /// Pushes the frontmost window to the back of the window stack
     /// </summary>
@@ -12,10 +12,13 @@ namespace WindowsJedi.Components
 
         public void PushBackFrontWindow()
         {
-            var handle = Win32.GetForegroundWindow();
-            if (handle == IntPtr.Zero) return;
+            var target = Window.ForegroundWindow();
+            if (target == null) return;
 
-            Win32.SetWindowPos(handle, Win32.HWND_BOTTOM, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE);
+            var next = target.NextVisibleBelow();
+            target.SendToBack();
+
+            if (next != null) next.Focus();
         }
     }
 }

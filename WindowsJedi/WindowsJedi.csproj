@@ -102,6 +102,7 @@
     <Compile Include="UserInterface\Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinApis\Data\WindowStack.cs" />
     <EmbeddedResource Include="Components\ConcentrationForm.resx">
       <DependentUpon>ConcentrationForm.cs</DependentUpon>
     </EmbeddedResource>
