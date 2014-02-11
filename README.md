@@ -20,6 +20,8 @@ What it does
  
 Planned
 -------
+ * 'Reference window' - for dual monitor setup, a window marked reference always stays on the opposite monitor
+   as the current focused window (so it's always visible to the side)
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
  * Maybe: a focus-set, where a few windows are tiled together and the main one can be rotated in.
  * Maybe: hide cursor while typing, as just about no Windows apps do this correctly! 
