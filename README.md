@@ -31,6 +31,7 @@ Todo / Bugs
  * Win-Tab in focus mode should switch focus to selected window
  * Focus mode isn't strict enough. Should be more like switcher with only one item
  * Clean up the codebase
+ * hide popups -- after 'hide', if all previously hidden pop-ups are closed, next action should be 'hide' not 'show'
 
 Interesting code features
 -------------------------
