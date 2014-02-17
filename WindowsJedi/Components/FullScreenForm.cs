@@ -20,8 +20,9 @@
         protected override CreateParams CreateParams {
 			get {
 				// Turn on WS_EX_TOOLWINDOW style bit -- hides from ALT-TAB
+                // Disable click-to-front (should be handle programatically)
 				var cp = base.CreateParams;
-				cp.ExStyle |= Win32.WS_EX_TOOLWINDOW;
+                cp.ExStyle |= Win32.WS_EX_TOOLWINDOW | Win32.WS_EX_NOACTIVATE;
 				return cp;
 			}
 		}

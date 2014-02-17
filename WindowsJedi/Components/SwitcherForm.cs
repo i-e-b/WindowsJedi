@@ -22,6 +22,7 @@ namespace WindowsJedi.Components {
 		}
 		private volatile bool _showing;
 		private readonly List<Window> _windows;
+        readonly List<Form> _overlays;
 		private readonly KeyHookManager _keyMgr;
 		private readonly Queue<PassThroughKey> _passThroughKeys;
         bool _showingPopups;
@@ -29,6 +30,13 @@ namespace WindowsJedi.Components {
         const bool ShowPopupsInitially = false;
         const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+        protected override void OnClick(EventArgs e)
+        {
+            foreach (var form in _overlays)
+            {
+                form.BringToFront();
+            }
+        }
 
 		public SwitcherForm() {
 			_keyMgr = new KeyHookManager();
@@ -37,6 +45,7 @@ namespace WindowsJedi.Components {
 			KeyPreview = true;
 			_passThroughKeys = new Queue<PassThroughKey>();
 			_windows = new List<Window>();
+            _overlays = new List<Form>();
 		}
 
         protected override void Dispose(bool disposing)
@@ -65,30 +74,50 @@ namespace WindowsJedi.Components {
 			Win32.SetForegroundWindow(Handle);
 			_showing = true;
 
-
-
-            //************** EXPERIMENT ********************
-            // Showing an overlay on top of DWM thumbs. Seems to work ok.
-            /*experiment = new DraggableOverlayForm { TopMost = true, TopLevel = true, Width = 64, Height = 64, Top = 10, Left = 10 };
-
-            var bmp = new Bitmap(64, 64);
-            using (var g = Graphics.FromImage(bmp))
-            {
-                g.Clear(Color.Transparent);
-                g.FillEllipse(Brushes.SeaGreen, 0, 0, 64, 64);
-            }
-            experiment.SetBitmap(bmp);
-            experiment.Show();
-            experiment.BringToFront();*/
+            ShowOverlays();
 		}
-        //DraggableOverlayForm experiment;
+
+        void ShowOverlays()
+        {
+            HideOverlays();
+
+            try
+            {
+                foreach (var window in _windows)
+                {
+                    var target = window.TargetRectangle;
+                    if (!target.HasValue) continue;
+                    var icon = window.GetAppIcon();
+                    if (icon == null) continue;
+
+                    var lay = new NonHitOverlayForm { TopMost = true, TopLevel = true, Width = 64, Height = 64, Top = target.Value.Bottom - 32, Left = target.Value.Right - 32 };
+                    _overlays.Add(lay);
+                    lay.SetBitmap(icon.ToBitmap());
+                    lay.Show();
+                    lay.BringToFront();
+                }
+            }
+            catch
+            {
+                HideOverlays();
+                throw;
+            }
+        }
+
+        void HideOverlays()
+        {
+            foreach (var form in _overlays)
+            {
+                form.Close();
+                form.Dispose();
+            }
+            _overlays.Clear();
+        }
+
 
         public void HideSwitcher()
-        {
-            /*experiment.Close();
-            experiment.Dispose();*/
-
-			_showing = false;
+        {			_showing = false;
+            HideOverlays();
 			HideDwmThumbs();
 			TopMost = false;
 			Hide();

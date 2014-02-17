@@ -97,6 +97,9 @@ namespace WindowsJedi.WinApis {
 			}
 		}
 
+        /// <summary>
+        /// Internal target for this window. Used for layout algorithms.
+        /// </summary>
 		public Rectangle? TargetRectangle { get; set; }
 
         /// <summary>
@@ -278,6 +281,31 @@ namespace WindowsJedi.WinApis {
                 found = Win32.GetWindow(found, WindowStack.BelowTarget);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Try to return the Exe icon for a given window. Tries to return largest first
+        /// <para>Return null if one can't be found</para>
+        /// </summary>
+        public Icon GetAppIcon()
+        {
+            var iconHandle = Win32.SendMessage(_handle, Win32.WM_GETICON, Win32.ICON_BIG, 0);
+            if (iconHandle == IntPtr.Zero)
+                iconHandle = Win32.SendMessage(_handle, Win32.WM_GETICON, Win32.ICON_SMALL, 0);
+            if (iconHandle == IntPtr.Zero)
+                iconHandle = Win32.SendMessage(_handle, Win32.WM_GETICON, Win32.ICON_SMALL2, 0);
+            if (iconHandle == IntPtr.Zero)
+                iconHandle = GetClassLongPtr(_handle, Win32.GCL_HICON);
+            if (iconHandle == IntPtr.Zero)
+                iconHandle = GetClassLongPtr(_handle, Win32.GCL_HICONSM);
+
+            return iconHandle == IntPtr.Zero ? null : Icon.FromHandle(iconHandle);
+        }
+
+        static IntPtr GetClassLongPtr(IntPtr hWnd, int nIndex)
+        {
+            if (IntPtr.Size > 4) return Win32.GetClassLongPtr64(hWnd, nIndex);
+            return new IntPtr(Win32.GetClassLongPtr32(hWnd, nIndex));
         }
 
         private static bool WindowIsVisible(IntPtr target)

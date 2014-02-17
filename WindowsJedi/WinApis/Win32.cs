@@ -177,7 +177,8 @@ namespace WindowsJedi.WinApis {
 		public const int WM_SYSKEYDOWN = 0x104;
 		public const int WM_SYSKEYUP = 0x105;
 		public const int WM_NCHITTEST = 0x0084;
-		public const int WM_ACTIVATEAPP = 0x001C;
+        public const int WM_ACTIVATEAPP = 0x001C;
+        public const int WM_GETICON = 0x7F;
 		#endregion
 
         #region Hwnd positions
@@ -185,6 +186,11 @@ namespace WindowsJedi.WinApis {
         public static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
         public static readonly IntPtr HWND_TOP = new IntPtr(0);
         public static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        #endregion
+
+        #region Window hit detection
+        public static IntPtr HTCLIENT = new IntPtr(2);
+        public static IntPtr HTNOWHERE = new IntPtr(0);
         #endregion
 
         #region Windows Hooks
@@ -197,12 +203,14 @@ namespace WindowsJedi.WinApis {
 		public const ulong WS_BORDER = 0x00800000L;
 		public const ulong WS_CHILD = 0x40000000L;
 		public const ulong WS_OVERLAPPED = 0;
-		public const ulong WS_POPUP = 0x80000000;
+        public const ulong WS_POPUP = 0x80000000;
+        public const ulong WS_DLGFRAME = 0x00400000L;
 
 		public const int WS_EX_TOPMOST = 0x00000008;
 		public const int WS_EX_APPWINDOW = 0x00040000;
 		public const int WS_EX_LAYERED = 0x00080000;
 		public const int WS_EX_TOOLWINDOW = 0x80;
+        public const int WS_EX_NOACTIVATE = 0x08000000;
 		#endregion
 
         #region Window positioning flags
@@ -254,10 +262,18 @@ namespace WindowsJedi.WinApis {
 		public const int DWM_TNP_OPACITY = 0x4;
 		public const int DWM_TNP_RECTDESTINATION = 0x1;
 		#endregion
-		#endregion
 
-		#region Kernel 32
-		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        #region Icon styles
+        public const int GCL_HICONSM = -34;
+        public const int GCL_HICON = -14;
+        public const int ICON_SMALL = 0;
+        public const int ICON_BIG = 1;
+        public const int ICON_SMALL2 = 2;
+        #endregion
+        #endregion
+
+        #region Kernel 32
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern IntPtr GetModuleHandle (string lpModuleName);
 		#endregion
 		#region GDI 32
@@ -295,6 +311,15 @@ namespace WindowsJedi.WinApis {
         /// </summary>
         [DllImport("user32.dll")]
         public static extern bool IsWindow(IntPtr targetWindow);
+
+        [DllImport("user32.dll", EntryPoint = "GetClassLong")]
+        public static extern uint GetClassLongPtr32(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "GetClassLongPtr")]
+        public static extern IntPtr GetClassLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
         /// <summary>
         /// Set layered window. You must set the window layered first, using `SetWindowLong`
