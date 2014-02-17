@@ -1,12 +1,20 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Windows.Forms;
-using WindowsJedi.WinApis;
+﻿namespace WindowsJedi.Components {
+    using System;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.Windows.Forms;
+    using WindowsJedi.WinApis;
 
-namespace WindowsJedi.Components {
-	public class OverlayForm : Form {
-		/// <summary>
+    public class OverlayForm : Form {
+        protected override CreateParams CreateParams {
+            get {
+                var cp = base.CreateParams;
+                cp.ExStyle |= Win32.WS_EX_LAYERED; // This form has to have the WS_EX_LAYERED extended style
+                return cp;
+            }
+        }
+
+        /// <summary>
 		/// Set overlay bitmap
 		/// </summary>
 		public void SetBitmap (Bitmap bitmap) {
@@ -20,10 +28,10 @@ namespace WindowsJedi.Components {
 			if (bitmap.PixelFormat != PixelFormat.Format32bppArgb)
 				throw new ApplicationException("The bitmap must be 32ppp with alpha-channel.");
 
-			IntPtr screenDc = Win32.GetDC(IntPtr.Zero);
-			IntPtr memDc = Win32.CreateCompatibleDC(screenDc);
-			IntPtr hBitmap = IntPtr.Zero;
-			IntPtr oldBitmap = IntPtr.Zero;
+			var screenDc = Win32.GetDC(IntPtr.Zero);
+			var memDc = Win32.CreateCompatibleDC(screenDc);
+			var hBitmap = IntPtr.Zero;
+			var oldBitmap = IntPtr.Zero;
 
 			try {
 				hBitmap = bitmap.GetHbitmap(Color.FromArgb(0));  // grab a GDI handle from this GDI+ bitmap
@@ -49,15 +57,7 @@ namespace WindowsJedi.Components {
 				Win32.DeleteDC(memDc);
 			}
 		}
-
-		protected override CreateParams CreateParams {
-			get {
-				CreateParams cp = base.CreateParams;
-				cp.ExStyle |= Win32.WS_EX_LAYERED; // This form has to have the WS_EX_LAYERED extended style
-				return cp;
-			}
-		}
-	}
+    }
 
 	public class DraggableOverlayForm : OverlayForm {
 		protected override void WndProc (ref Message m) {

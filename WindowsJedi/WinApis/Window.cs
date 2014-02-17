@@ -135,6 +135,16 @@ namespace WindowsJedi.WinApis {
                 return WindowIsVisible(_handle);
             }
         }
+        /// <summary>
+        /// Returns true if the window is still present (regardless of if it's visible)
+        /// <para>Returns false if window has been closed / disposed</para>
+        /// </summary>
+        public bool Exists {
+            get
+            {
+                return Win32.IsWindow(_handle);
+            }
+        }
 
         /// <summary>
         /// Return approximate aspect ratio of the thumbnail DWM would show.

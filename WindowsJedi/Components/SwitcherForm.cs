@@ -7,7 +7,10 @@ using WindowsJedi.Algorithms;
 using WindowsJedi.WinApis;
 
 namespace WindowsJedi.Components {
-	/// <summary>
+    using System.Linq;
+    using System.Threading;
+
+    /// <summary>
 	/// Uses DWM composition to show an 'Expose' like alt-tab alternative.
 	/// Adds a keyboard shortcut to each window for quick selection
 	/// </summary>
@@ -21,7 +24,10 @@ namespace WindowsJedi.Components {
 		private readonly List<Window> _windows;
 		private readonly KeyHookManager _keyMgr;
 		private readonly Queue<PassThroughKey> _passThroughKeys;
-		private const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        bool _showingPopups;
+
+        const bool ShowPopupsInitially = false;
+        const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 
 		public SwitcherForm() {
@@ -51,15 +57,37 @@ namespace WindowsJedi.Components {
 
 		public void ShowSwitcher() {
 			Opacity = 1;
-			GetAndPackWindows();
+            _showingPopups = ShowPopupsInitially;
+            GetAndPackWindows(_showingPopups);
 			ShowDwmThumbs();
 			Show();
 			TopMost = true;
 			Win32.SetForegroundWindow(Handle);
 			_showing = true;
-		}
 
-		public void HideSwitcher () {
+
+
+            //************** EXPERIMENT ********************
+            // Showing an overlay on top of DWM thumbs. Seems to work ok.
+            /*experiment = new DraggableOverlayForm { TopMost = true, TopLevel = true, Width = 64, Height = 64, Top = 10, Left = 10 };
+
+            var bmp = new Bitmap(64, 64);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.Clear(Color.Transparent);
+                g.FillEllipse(Brushes.SeaGreen, 0, 0, 64, 64);
+            }
+            experiment.SetBitmap(bmp);
+            experiment.Show();
+            experiment.BringToFront();*/
+		}
+        //DraggableOverlayForm experiment;
+
+        public void HideSwitcher()
+        {
+            /*experiment.Close();
+            experiment.Dispose();*/
+
 			_showing = false;
 			HideDwmThumbs();
 			TopMost = false;
@@ -155,8 +183,14 @@ namespace WindowsJedi.Components {
 				return true;
 			}
 
-			var converter = new KeysConverter();
-			string ch = (converter.ConvertToString(k)??"").ToUpper();
+            if (k == Keys.Tab)
+            {
+                TogglePopups();
+                return true;
+            }
+
+		    var converter = new KeysConverter();
+            var ch = (converter.ConvertToString(k) ?? "").ToUpper();
 			var idx = SelectorKeys.IndexOf(ch, StringComparison.Ordinal);
 			if (idx < 0) return false;
 			if (idx >= _windows.Count) return true;
@@ -165,10 +199,18 @@ namespace WindowsJedi.Components {
 			return true;
 		}
 
-		protected override void OnPaint (PaintEventArgs e) {
+        void TogglePopups()
+        {
+            _showingPopups = !_showingPopups;
+            HideDwmThumbs();
+            GetAndPackWindows(_showingPopups);
+            ShowDwmThumbs();
+            Invalidate();
+        }
+
+        protected override void OnPaint (PaintEventArgs e) {
 			if (!_showing) return;
 			// TODO: some kind of overlay form for the titles and shortcuts -- DWM is overwriting this...
-			
 
 			using (var g = e.Graphics) {
 				var bold = new Font("Arial", 8.0f, FontStyle.Bold);
@@ -197,9 +239,9 @@ namespace WindowsJedi.Components {
 		}
 
 		#region Thumbnails
-		private void GetAndPackWindows() {
+		private void GetAndPackWindows(bool showPopups) {
 			_windows.Clear();
-			_windows.AddRange(WindowEnumeration.GetCurrentWindows());
+			_windows.AddRange(WindowEnumeration.GetCurrentWindows().Where(w=> (! w.IsPopup) || showPopups));
 			var scale = 0.7;
 			if (_windows.Count > 15) scale = 0.5;
 			while (!TryPacking(_windows, scale) && scale > 0.1) {
@@ -225,6 +267,8 @@ namespace WindowsJedi.Components {
 		}
 
 		private void ShowDwmThumbs () {
+
+
 			foreach (var window in _windows) {
 				if (window.TargetRectangle != null)
 					window.ShowDwmThumb(this, window.TargetRectangle.Value);

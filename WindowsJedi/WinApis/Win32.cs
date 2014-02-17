@@ -289,6 +289,13 @@ namespace WindowsJedi.WinApis {
         [DllImport("user32.dll")]
         public static extern IntPtr SetActiveWindow(IntPtr targetWindow);
 
+
+        /// <summary>
+        /// Returns true if handle is currently valid. It may not be your original window, use caution!
+        /// </summary>
+        [DllImport("user32.dll")]
+        public static extern bool IsWindow(IntPtr targetWindow);
+
         /// <summary>
         /// Set layered window. You must set the window layered first, using `SetWindowLong`
         /// </summary>

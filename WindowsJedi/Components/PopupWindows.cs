@@ -19,6 +19,16 @@ namespace WindowsJedi.Components
         {
             lock (Lock)
             {
+                if (_hiddenWindows.All(Closed))
+                {
+                    _hiddenWindows.Clear();
+                    foreach (var window in _hiddenWindows)
+                    {
+                        window.Dispose();
+                    }
+                    _hiddenWindows.Clear();
+                }
+
                 if (_hiddenWindows.Any())
                 {
                     foreach (var window in _hiddenWindows)
@@ -42,6 +52,11 @@ namespace WindowsJedi.Components
                     }
                 }
             }
+        }
+
+        static bool Closed(Window window)
+        {
+            return !window.Exists;
         }
 
         protected virtual void Dispose(bool disposing)
