@@ -8,13 +8,13 @@ using WindowsJedi.WinApis;
 
 namespace WindowsJedi.Components {
     using System.Linq;
-    using System.Threading;
 
     /// <summary>
 	/// Uses DWM composition to show an 'Expose' like alt-tab alternative.
 	/// Adds a keyboard shortcut to each window for quick selection
 	/// </summary>
-	public class SwitcherForm : FullScreenForm {
+    public class SwitcherForm : UnclickableFullScreenForm
+    {
 		[StructLayout(LayoutKind.Sequential)]
 		private struct PassThroughKey {
 			public Keys Key;
@@ -30,13 +30,6 @@ namespace WindowsJedi.Components {
         const bool ShowPopupsInitially = false;
         const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        protected override void OnClick(EventArgs e)
-        {
-            foreach (var form in _overlays)
-            {
-                form.BringToFront();
-            }
-        }
 
 		public SwitcherForm() {
 			_keyMgr = new KeyHookManager();
@@ -65,6 +58,7 @@ namespace WindowsJedi.Components {
 		}
 
 		public void ShowSwitcher() {
+            HideOverlays();
 			Opacity = 1;
             _showingPopups = ShowPopupsInitially;
             GetAndPackWindows(_showingPopups);
@@ -90,7 +84,7 @@ namespace WindowsJedi.Components {
                     var icon = window.GetAppIcon();
                     if (icon == null) continue;
 
-                    var lay = new NonHitOverlayForm { TopMost = true, TopLevel = true, Width = 64, Height = 64, Top = target.Value.Bottom - 32, Left = target.Value.Right - 32 };
+                    var lay = new NonHitOverlayForm { TopMost = true, TopLevel = true, Width = 32, Height = 32, Top = target.Value.Bottom - 32, Left = target.Value.Left };
                     _overlays.Add(lay);
                     lay.SetBitmap(icon.ToBitmap());
                     lay.Show();
@@ -230,20 +224,22 @@ namespace WindowsJedi.Components {
 
         void TogglePopups()
         {
+            HideOverlays();
             _showingPopups = !_showingPopups;
             HideDwmThumbs();
             GetAndPackWindows(_showingPopups);
             ShowDwmThumbs();
+            ShowOverlays();
             Invalidate();
         }
 
         protected override void OnPaint (PaintEventArgs e) {
 			if (!_showing) return;
-			// TODO: some kind of overlay form for the titles and shortcuts -- DWM is overwriting this...
+			// TODO: move this out to the overlay windows, with a translucient background.
 
 			using (var g = e.Graphics) {
-				var bold = new Font("Arial", 8.0f, FontStyle.Bold);
-				var regular = new Font("Arial", 8.0f, FontStyle.Regular);
+				var accelFont = new Font("Arial", 12.0f, FontStyle.Bold);
+				var titleFont = new Font("Arial", 8.0f, FontStyle.Regular);
 				var wb = new SolidBrush(Color.White);
 				int i = 0;
 				foreach (var window in _windows) {
@@ -251,16 +247,16 @@ namespace WindowsJedi.Components {
                     var rect = window.TargetRectangle.Value;
 
 					var title = window.Title;
-                    var left = rect.X;
+                    var left = rect.X + 30;
                     var bottomOfTile = (rect.Y + rect.Height) - 18;
                     var width = Math.Max(rect.Width, 20);
 
                     if (i < SelectorKeys.Length)
                     {
-                        g.DrawString(" " + SelectorKeys[i] + " ", bold, wb, new RectangleF(left, bottomOfTile, width, 20));
-                        left += 15;
+                        g.DrawString(" " + SelectorKeys[i] + " ", accelFont, wb, new RectangleF(left, bottomOfTile - 2, width, 20));
+                        left += 20;
                     }
-                    g.DrawString(title, regular, wb, new RectangleF(left, bottomOfTile, width, 20));
+                    g.DrawString(title, titleFont, wb, new RectangleF(left, bottomOfTile, width, 20));
 
 					i++;
 				}

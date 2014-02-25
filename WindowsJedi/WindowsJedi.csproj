@@ -64,11 +64,17 @@
   <ItemGroup>
     <Compile Include="Algorithms\CygonPacker.cs" />
     <Compile Include="Algorithms\FitBoxes.cs" />
+    <Compile Include="Components\ClickInvisibleFullScreenForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Components\ConcentrationForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Components\PopupWindows.cs" />
     <Compile Include="Components\Pushback.cs" />
+    <Compile Include="Components\UnclickableFullScreenForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="WinApis\Desktop.cs" />
     <Compile Include="Components\DummyForm.cs">
       <SubType>Form</SubType>
