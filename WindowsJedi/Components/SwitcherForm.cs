@@ -13,7 +13,7 @@ namespace WindowsJedi.Components {
 	/// Uses DWM composition to show an 'Expose' like alt-tab alternative.
 	/// Adds a keyboard shortcut to each window for quick selection
 	/// </summary>
-    public class SwitcherForm : UnclickableFullScreenForm
+    public class SwitcherForm : ClickInvisibleFullScreenForm
     {
 		[StructLayout(LayoutKind.Sequential)]
 		private struct PassThroughKey {
