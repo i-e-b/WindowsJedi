@@ -1,5 +1,5 @@
 ﻿namespace WindowsJedi.Components {
-	partial class DummyForm {
+	partial class ShellEventsDelegateForm {
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -30,7 +30,7 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(120, 32);
-			this.Name = "DummyForm";
+			this.Name = "ShellEventsDelegateForm";
 			this.Text = "DummyForm";
 			this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
 			this.ResumeLayout(false);

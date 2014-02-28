@@ -448,6 +448,9 @@ namespace WindowsJedi.WinApis {
 		[DllImport("user32.dll")]
 		public static extern int GetWindowText (IntPtr hWnd,
 			StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern bool RegisterShellHookWindow(IntPtr handle);
 		#endregion
 
 		#region DWM api
@@ -473,5 +476,6 @@ namespace WindowsJedi.WinApis {
 
 		public delegate int HookProc (int nCode, Int32 wParam, IntPtr lParam);
 		#endregion
+
 	}
 }

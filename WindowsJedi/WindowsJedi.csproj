@@ -76,11 +76,11 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="WinApis\Desktop.cs" />
-    <Compile Include="Components\DummyForm.cs">
+    <Compile Include="Components\ShellEventsDelegateForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Components\DummyForm.Designer.cs">
-      <DependentUpon>DummyForm.cs</DependentUpon>
+    <Compile Include="Components\ShellEventsDelegateForm.Designer.cs">
+      <DependentUpon>ShellEventsDelegateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Components\FullScreenForm.cs">
       <SubType>Form</SubType>
@@ -112,8 +112,8 @@
     <EmbeddedResource Include="Components\ConcentrationForm.resx">
       <DependentUpon>ConcentrationForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Components\DummyForm.resx">
-      <DependentUpon>DummyForm.cs</DependentUpon>
+    <EmbeddedResource Include="Components\ShellEventsDelegateForm.resx">
+      <DependentUpon>ShellEventsDelegateForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

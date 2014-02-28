@@ -157,7 +157,7 @@ namespace WindowsJedi.WinApis {
             IntPtr dwmThumb = IntPtr.Zero;
             try
             {
-                int i = Win32.DwmRegisterThumbnail(Program.DummyForm.Handle, _handle, out dwmThumb);
+                int i = Win32.DwmRegisterThumbnail(Program.ShellEventsDelegateForm.Handle, _handle, out dwmThumb);
                 if (i != 0) return new Size(SafeRectangle.Width, SafeRectangle.Height);
                 
                 Win32.PSIZE size;

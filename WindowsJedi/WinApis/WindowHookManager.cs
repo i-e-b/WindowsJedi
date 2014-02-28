@@ -10,8 +10,7 @@ namespace WindowsJedi.WinApis {
     public class WindowHookManager : CriticalFinalizerObject, IDisposable
     {
 		private readonly IntPtr _windowsEventsHook;
-        private readonly Win32.WinEventDelegate _hookDelegate;
-	    private GCHandle _focusedChangedEventPin, _windowsEventHookPin, _hookDelegatePin;
+        private GCHandle _focusedChangedEventPin, _hookDelegatePin;
 
 	    public event EventHandler<WindowFocusChangedEventArgs> WindowFocusChanged;
 
@@ -27,23 +26,20 @@ namespace WindowsJedi.WinApis {
         /// Create a window hook manager and start listening for events
         /// </summary>
 		public WindowHookManager () {
-            _hookDelegate = WinEventProc;
+            Win32.WinEventDelegate hookDelegate = WinEventProc;
 
             _focusedChangedEventPin = GCHandle.Alloc(WindowFocusChanged);
-            _windowsEventHookPin = GCHandle.Alloc(_windowsEventsHook);
-            _hookDelegatePin = GCHandle.Alloc(_hookDelegate);
+            _hookDelegatePin = GCHandle.Alloc(hookDelegate);
 
 			_windowsEventsHook = Win32.SetWinEventHook(Win32.EVENT_SYSTEM_FOREGROUND,
 						  Win32.EVENT_SYSTEM_FOREGROUND, IntPtr.Zero,
-                          _hookDelegate, 0, 0, Win32.WINEVENT_OUTOFCONTEXT);
-
+                          hookDelegate, 0, 0, Win32.WINEVENT_OUTOFCONTEXT);
 		}
         
         ~WindowHookManager()
         {
             Win32.UnhookWinEvent(_windowsEventsHook);
             if (_focusedChangedEventPin.IsAllocated) _focusedChangedEventPin.Free();
-            if (_windowsEventHookPin.IsAllocated) _windowsEventHookPin.Free();
             if (_hookDelegatePin.IsAllocated) _hookDelegatePin.Free();
 		}
 
@@ -53,7 +49,6 @@ namespace WindowsJedi.WinApis {
 
             Win32.UnhookWinEvent(_windowsEventsHook);
             if (_focusedChangedEventPin.IsAllocated) _focusedChangedEventPin.Free();
-            if (_windowsEventHookPin.IsAllocated) _windowsEventHookPin.Free();
             if (_hookDelegatePin.IsAllocated) _hookDelegatePin.Free();
         }
 
@@ -69,15 +64,20 @@ namespace WindowsJedi.WinApis {
         /// <summary>
         /// Bridge from Win32 callback to .Net event
         /// </summary>
-	    private void WinEventProc (IntPtr hWinEventHook, uint eventType,
-		   IntPtr hwnd, int idObject, int idChild,
-		   uint dwEventThread, uint dwmsEventTime) {
-			if (eventType == Win32.EVENT_SYSTEM_FOREGROUND) {
-				InvokeWindowFocusChanged(hwnd);
-			}
-		}
+        private void WinEventProc(IntPtr hWinEventHook, uint eventType,
+                                  IntPtr hwnd, int idObject, int idChild,
+                                  uint dwEventThread, uint dwmsEventTime)
+        {
+            switch (eventType) {
+                case Win32.EVENT_SYSTEM_FOREGROUND:
+                    InvokeWindowFocusChanged(hwnd);
+                    break;
 
-	}
+
+            }
+        }
+
+    }
 
     public class WindowFocusChangedEventArgs : EventArgs {
 		private readonly IntPtr _windowHandle;

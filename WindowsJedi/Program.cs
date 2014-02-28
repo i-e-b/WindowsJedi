@@ -6,14 +6,19 @@ using WindowsJedi.Properties;
 using WindowsJedi.UserInterface;
 
 namespace WindowsJedi {
-	static class Program {
+    using WindowsJedi.WinApis;
+
+    static class Program {
         public static NotifyTrayApp Notify;
-        public static DummyForm DummyForm;
+        public static ShellEventsDelegateForm ShellEventsDelegateForm;
 
 
 		[STAThread]
 		static void Main () {
 			InitialiseWinForms();
+
+            // Hook 'shell' events into the capturing form.
+            Win32.RegisterShellHookWindow(ShellEventsDelegateForm.Handle);
 
             using (var switcherForm = new SwitcherForm())
             using (var concentrationForm = new ConcentrationForm())
@@ -36,7 +41,7 @@ namespace WindowsJedi {
                 Application.Run();
 
             }
-            DummyForm.Dispose();
+            ShellEventsDelegateForm.Dispose();
 		}
 
 		static void Application_ThreadException (object sender, ThreadExceptionEventArgs e) {
@@ -45,9 +50,9 @@ namespace WindowsJedi {
 		private static void InitialiseWinForms() {
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			DummyForm = new DummyForm();
-			DummyForm.Show();
-			DummyForm.Hide();
+			ShellEventsDelegateForm = new ShellEventsDelegateForm();
+			ShellEventsDelegateForm.Show();
+			ShellEventsDelegateForm.Hide();
 		}
 
 	}
