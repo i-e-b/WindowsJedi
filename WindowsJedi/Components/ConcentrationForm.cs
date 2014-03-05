@@ -46,6 +46,7 @@ namespace WindowsJedi.Components {
 			} else {
 				ConcentrateFadeIn();
 			}
+            _winHook.WindowFocusChanged += winHook_WindowFocusChanged;
 		}
 
 		/// <summary>
@@ -60,7 +61,7 @@ namespace WindowsJedi.Components {
 				Invoke(new MethodInvoker(ConcentrateFadeOut));
 			} else {
 				ConcentrateFadeOut();
-			}
+            }
 		}
 
 
@@ -96,6 +97,7 @@ namespace WindowsJedi.Components {
 		private void ConcentrateFadeIn () {
 			Opacity = 0;
 			Show();
+            new Window(Handle).PutUnder(_currentWindow);
 			Win32.BringWindowToTop(_currentWindow);
 			if (!Win32.LockSetForegroundWindow(Win32.LSFW_LOCK)) {}
 			
@@ -104,8 +106,6 @@ namespace WindowsJedi.Components {
 				Thread.Sleep(5);
 				Opacity += .04;
 			}
-			
-			_winHook.WindowFocusChanged += winHook_WindowFocusChanged;
 		}
 
 		private void ConcentrateFadeOut () {
