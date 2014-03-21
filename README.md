@@ -13,7 +13,10 @@ What it does
  1. **Replace `Win-Tab`** with something more useful (a bit like expose, but with a significantly different way of packing
    and selecting). Note that each thumbnail has a single character before it's name/label. Press this key to select the window.
    Thumbnails are ordered left-to-right by z-order (same as alt-tab). Pop-up class windows (like
-   VisualStudio uses) are not shown by default. Press `tab` without `win` to toggle popups in the switcher.
+   VisualStudio uses) are not shown by default.
+   * Press quick-key to select a window and exit switcher
+   * Press `tab` without `win` to toggle popups in the switcher.
+   * Hold shift and press quick-key to close a window
  2. **Focus-mode** `RightShift-F12` dim other windows and make a best effort to prevent the focus-stealing that plagues Windows
  3. **Hide popups** `Win-Space` toggles visibility of pop-up windows. This is handy when using Visual Studio's mess of
    a window set. Visibility toggle is conservative and system-wide. Stacking order is reversed on each display.

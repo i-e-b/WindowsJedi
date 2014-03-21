@@ -171,7 +171,7 @@ namespace WindowsJedi.WinApis {
 		}
 		#endregion
 		#region Constants
-		#region Window Manager
+		#region Window Manager events
 		public const int WM_KEYDOWN = 0x100;
 		public const int WM_KEYUP = 0x101;
 		public const int WM_SYSKEYDOWN = 0x104;
@@ -179,6 +179,7 @@ namespace WindowsJedi.WinApis {
 		public const int WM_NCHITTEST = 0x0084;
         public const int WM_ACTIVATEAPP = 0x001C;
         public const int WM_GETICON = 0x7F;
+        public const int WM_CLOSE = 0x0010;
 		#endregion
 
         #region Hwnd positions

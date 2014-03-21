@@ -8,6 +8,7 @@ using WindowsJedi.WinApis;
 
 namespace WindowsJedi.Components {
     using System.Linq;
+    using System.Threading;
 
     /// <summary>
 	/// Uses DWM composition to show an 'Expose' like alt-tab alternative.
@@ -26,6 +27,7 @@ namespace WindowsJedi.Components {
 		private readonly KeyHookManager _keyMgr;
 		private readonly Queue<PassThroughKey> _passThroughKeys;
         bool _showingPopups;
+        bool _closeMode = false;
 
         const bool ShowPopupsInitially = false;
         const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -58,6 +60,7 @@ namespace WindowsJedi.Components {
 		}
 
 		public void ShowSwitcher() {
+            _closeMode = false;
             HideOverlays();
 			Opacity = 1;
             _showingPopups = ShowPopupsInitially;
@@ -134,12 +137,13 @@ namespace WindowsJedi.Components {
 		}
 
 		void keyMgr_KeyUp (object sender, KeyEventArgs e) {
+            HandleKeyUp(e.KeyData);
 			if (_showing) {
 				GenerateKey(Keys.F24, true);
 			}
 		}
 
-		private void keyMgr_KeyDown (object sender, KeyEventArgs e) {
+        private void keyMgr_KeyDown (object sender, KeyEventArgs e) {
 			if (_showing) {
 				if (HandleKeyDown(e.KeyData)) {
 					e.SuppressKeyPress = true;
@@ -195,6 +199,17 @@ namespace WindowsJedi.Components {
 	    private void Ignore() { }
 
 	    #endregion
+
+
+
+        void HandleKeyUp(Keys k)
+        {
+            if (k == Keys.LShiftKey || k == Keys.RShiftKey)
+            {
+                _closeMode = false;
+			}
+        }
+
 		/// <summary>
 		/// Switch to a window if user presses it's quick-key
 		/// </summary>
@@ -212,22 +227,50 @@ namespace WindowsJedi.Components {
                 return true;
             }
 
+            if (k == Keys.LShiftKey || k == Keys.RShiftKey)
+            {
+                _closeMode = true;
+            }
+
+
 		    var converter = new KeysConverter();
             var ch = (converter.ConvertToString(k) ?? "").ToUpper();
 			var idx = SelectorKeys.IndexOf(ch, StringComparison.Ordinal);
 			if (idx < 0) return false;
 			if (idx >= _windows.Count) return true;
-			_windows[idx].Focus();
-			HideSwitcher();
+
+
+            if (_closeMode)
+            {
+                // close window, stay in the switcher
+                CloseAndRedisplay(_windows[idx]);
+            }
+            else
+            {
+                // Select and leave the switcher
+                _windows[idx].Focus();
+                HideSwitcher();
+            }
 			return true;
 		}
 
+        void CloseAndRedisplay(Window w)
+        {
+            w.Close();
+            Redisplay(false);
+        }
+
         void TogglePopups()
         {
-            HideOverlays();
             _showingPopups = !_showingPopups;
+            Redisplay(true);
+        }
+
+        void Redisplay(bool Repack)
+        {
+            HideOverlays();
             HideDwmThumbs();
-            GetAndPackWindows(_showingPopups);
+            if (Repack) GetAndPackWindows(_showingPopups);
             ShowDwmThumbs();
             ShowOverlays();
             Invalidate();
@@ -266,7 +309,10 @@ namespace WindowsJedi.Components {
 		#region Thumbnails
 		private void GetAndPackWindows(bool showPopups) {
 			_windows.Clear();
-			_windows.AddRange(WindowEnumeration.GetCurrentWindows().Where(w=> (! w.IsPopup) || showPopups));
+			_windows.AddRange(WindowEnumeration.GetCurrentWindows()
+                .Where(w=> (! w.IsPopup) || showPopups)
+                .Where(NotInIgnoreList));
+
 			var scale = 0.7;
 			if (_windows.Count > 15) scale = 0.5;
 			while (!TryPacking(_windows, scale) && scale > 0.1) {
@@ -274,7 +320,14 @@ namespace WindowsJedi.Components {
 			}
 		}
 
-		private bool TryPacking (IEnumerable<Window> windows, double scale) {
+        static bool NotInIgnoreList(Window arg)
+        {
+            return !(
+                arg.Title.StartsWith("ASP.NET Developer Server")
+                );
+        }
+
+        private bool TryPacking (IEnumerable<Window> windows, double scale) {
 			var packer = new CygonRectanglePacker(Width, Height);
 			foreach (var window in windows) {
 				try {

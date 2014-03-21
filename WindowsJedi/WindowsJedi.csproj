@@ -64,7 +64,7 @@
   <ItemGroup>
     <Compile Include="Algorithms\CygonPacker.cs" />
     <Compile Include="Algorithms\FitBoxes.cs" />
-    <Compile Include="Components\ClickInvisibleFullScreenForm.cs">
+    <Compile Include="Components\Bases\ClickInvisibleFullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Components\ConcentrationForm.cs">
@@ -72,17 +72,17 @@
     </Compile>
     <Compile Include="Components\PopupWindows.cs" />
     <Compile Include="Components\Pushback.cs" />
-    <Compile Include="Components\UnclickableFullScreenForm.cs">
+    <Compile Include="Components\Bases\UnclickableFullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="WinApis\Desktop.cs" />
-    <Compile Include="Components\ShellEventsDelegateForm.cs">
+    <Compile Include="Components\Bases\ShellEventsDelegateForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Components\ShellEventsDelegateForm.Designer.cs">
+    <Compile Include="Components\Bases\ShellEventsDelegateForm.Designer.cs">
       <DependentUpon>ShellEventsDelegateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Components\FullScreenForm.cs">
+    <Compile Include="Components\Bases\FullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Components\SwitcherForm.cs">
@@ -95,7 +95,7 @@
     <Compile Include="WinApis\WindowHookManager.cs" />
     <Compile Include="HotkeyCore.cs" />
     <Compile Include="WinApis\KeyHookManager.cs" />
-    <Compile Include="Components\OverlayForm.cs">
+    <Compile Include="Components\Bases\OverlayForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Program.cs" />
@@ -112,7 +112,7 @@
     <EmbeddedResource Include="Components\ConcentrationForm.resx">
       <DependentUpon>ConcentrationForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Components\ShellEventsDelegateForm.resx">
+    <EmbeddedResource Include="Components\Bases\ShellEventsDelegateForm.resx">
       <DependentUpon>ShellEventsDelegateForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

@@ -39,12 +39,12 @@ namespace WindowsJedi.WinApis {
 
 		public string Title {
 			get {
-				if (_title == null) {
-					var sb = new StringBuilder(100);
-					Win32.GetWindowText(_handle, sb, sb.Capacity);
-					_title = sb.ToString();
-				}
-				return _title;
+			    if (_title != null) return _title;
+
+			    var sb = new StringBuilder(1000);
+			    Win32.GetWindowText(_handle, sb, sb.Capacity);
+			    _title = sb.ToString();
+			    return _title;
 			}
 		}
 
@@ -327,6 +327,14 @@ namespace WindowsJedi.WinApis {
         public void PutUnder(IntPtr targetHwnd)
         {
             Win32.SetWindowPos(_handle, targetHwnd, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE);
+        }
+
+        /// <summary>
+        /// Send a close message to a window. This is not a force close, so it can be ignored or cause more windows to show up.
+        /// </summary>
+        public void Close()
+        {
+            Win32.SendMessage(_handle, Win32.WM_CLOSE, 0, 0);
         }
 	}
 }
