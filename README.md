@@ -18,8 +18,10 @@ What it does
    * Press `tab` without `win` to toggle popups in the switcher.
    * Hold shift and press quick-key to close a window
  2. **Focus-mode** `RightShift-F12` dim other windows and make a best effort to prevent the focus-stealing that plagues Windows
- 3. **Hide popups** `Win-Space` toggles visibility of pop-up windows. This is handy when using Visual Studio's mess of
+ 3. **Hide popups**
+    `Win-Space` toggles visibility of pop-up windows. This is handy when using Visual Studio's mess of
    a window set. Visibility toggle is conservative and system-wide. Stacking order is reversed on each display.
+    `Ctrl-Win-Space` toggles translucency of popups, making them see-through.
  4. **Push-back** `Win-Escape` pushes the current foreground window to the back of the stack. Useful when you've got several reference windows open.
  
 Planned

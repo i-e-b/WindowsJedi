@@ -29,7 +29,8 @@ namespace WindowsJedi {
 // ReSharper disable AccessToDisposedClosure
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                 hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
-                hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.Toggle);
+                hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.ToggleVisibility);
+                hotKeys.Bind(new[] { Keys.LControlKey, Keys.LWin, Keys.Space }, popupWindows.ToggleFade);
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Escape }, pushback.PushBackFrontWindow);
 // ReSharper restore AccessToDisposedClosure
 

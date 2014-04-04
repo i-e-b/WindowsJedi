@@ -226,7 +226,7 @@ namespace WindowsJedi.WinApis {
             Win32.SetWindowLongPtr(_handle, Win32.GWL_EXSTYLE, new IntPtr(Win32.GetWindowLongPtr(_handle, Win32.GWL_EXSTYLE).ToInt32() | Win32.WS_EX_LAYERED));
 
             // Make this window 70% alpha
-            Win32.SetLayeredWindowAttributes(_handle, 0, (255 * 70) / 100, LayeredWindowFlags.UseAlpha);
+            Win32.SetLayeredWindowAttributes(_handle, 0, translucency, LayeredWindowFlags.UseAlpha);
 
             // Ask the window and its children to repaint
             Win32.RedrawWindow(_handle, IntPtr.Zero, IntPtr.Zero, Win32.RDW_ERASE | Win32.RDW_INVALIDATE | Win32.RDW_FRAME | Win32.RDW_ALLCHILDREN);

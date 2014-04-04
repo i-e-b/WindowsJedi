@@ -7,15 +7,16 @@ namespace WindowsJedi.Components
 {
     public class PopupWindows : IDisposable
     {
-        readonly List<Window> _hiddenWindows;
+        readonly List<Window> _hiddenWindows, _fadedWindows;
         static readonly object Lock = new object();
 
         public PopupWindows()
         {
             _hiddenWindows = new List<Window>();
+            _fadedWindows = new List<Window>();
         }
 
-        public void Toggle()
+        public void ToggleVisibility()
         {
             lock (Lock)
             {
@@ -31,12 +32,7 @@ namespace WindowsJedi.Components
 
                 if (_hiddenWindows.Any())
                 {
-                    foreach (var window in _hiddenWindows)
-                    {
-                        window.Show();
-                        window.Dispose();
-                    }
-                    _hiddenWindows.Clear();
+                    ShowHiddenWindows();
                 }
                 else
                 {
@@ -54,6 +50,16 @@ namespace WindowsJedi.Components
             }
         }
 
+        void ShowHiddenWindows()
+        {
+            foreach (var window in _hiddenWindows)
+            {
+                window.Show();
+                window.Dispose();
+            }
+            _hiddenWindows.Clear();
+        }
+
         static bool Closed(Window window)
         {
             return !window.Exists;
@@ -63,20 +69,57 @@ namespace WindowsJedi.Components
         {
             lock (Lock)
             {
-                if (!_hiddenWindows.Any()) return;
-
-                foreach (var window in _hiddenWindows)
-                {
-                    window.Show();
-                    window.Dispose();
-                }
-                _hiddenWindows.Clear();
+                ShowHiddenWindows();
             }
         }
 
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        /// <summary>
+        /// This doesn't work very well on WPF windows, as they have weird container windows that retain opacity.
+        /// </summary>
+        public void ToggleFade()
+        {
+            lock (Lock)
+            {
+                if (_fadedWindows.All(Closed))
+                {
+                    _fadedWindows.Clear();
+                    foreach (var window in _fadedWindows)
+                    {
+                        window.Dispose();
+                    }
+                    _fadedWindows.Clear();
+                }
+                if (_fadedWindows.Any())
+                {
+                    foreach (var window in _fadedWindows)
+                    {
+                        window.SetOpaque();
+                        window.Dispose();
+                    }
+                    _fadedWindows.Clear();
+                }
+                else
+                {
+                    foreach (var window in WindowEnumeration.GetCurrentWindows())
+                    {
+                        // Not filtered to popups until it's working properly
+                        /*if (!window.IsPopup || !window.IsVisible)
+                        {
+                            window.Dispose();
+                            continue;
+                        }*/
+                        
+                        window.SetTranslucent(70);
+
+                        _fadedWindows.Add(window);
+                    }
+                }
+            }
         }
     }
 }
