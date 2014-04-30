@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using WindowsJedi.Algorithms;
-using WindowsJedi.WinApis;
-
-namespace WindowsJedi.Components {
+﻿namespace WindowsJedi.Features {
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
     using System.Linq;
-    using System.Threading;
+    using System.Runtime.InteropServices;
+    using System.Windows.Forms;
+    using WindowsJedi.Algorithms;
+    using WindowsJedi.Components;
+    using WindowsJedi.WinApis;
 
     /// <summary>
 	/// Uses DWM composition to show an 'Expose' like alt-tab alternative.

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Threading;
-using System.Windows.Forms;
-using WindowsJedi.Components;
-using WindowsJedi.Properties;
-using WindowsJedi.UserInterface;
-
-namespace WindowsJedi {
+﻿namespace WindowsJedi {
+    using System;
+    using System.Threading;
+    using System.Windows.Forms;
+    using WindowsJedi.Components;
+    using WindowsJedi.Features;
+    using WindowsJedi.Properties;
+    using WindowsJedi.UserInterface;
     using WindowsJedi.WinApis;
+    using Settings = WindowsJedi.UserInterface.Settings;
 
     static class Program {
         public static NotifyTrayApp Notify;
@@ -24,18 +25,19 @@ namespace WindowsJedi {
             using (var concentrationForm = new ConcentrationForm())
             using (var popupWindows = new PopupWindows())
             using (var pushback = new Pushback())
+            //using (var experimental = new Experimental())
             using (var hotKeys = new HotkeyCore())
             {
-// ReSharper disable AccessToDisposedClosure
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                 hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.ToggleVisibility);
                 hotKeys.Bind(new[] { Keys.LControlKey, Keys.LWin, Keys.Space }, popupWindows.ToggleFade);
                 hotKeys.Bind(new[] { Keys.LWin, Keys.Escape }, pushback.PushBackFrontWindow);
-// ReSharper restore AccessToDisposedClosure
 
-                Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "http://snippetsfor.net/WindowsJedi");
-                Notify.AddMenuItem("Settings", delegate { (new UserInterface.Settings()).ShowDialog(); });
+                //hotKeys.Bind(new[] { Keys.LWin, Keys.A }, experimental.HideForegroundWindow);
+
+                Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
+                Notify.AddMenuItem("Settings", delegate { (new Settings()).ShowDialog(); });
 
                 Application.ThreadException += Application_ThreadException;
 

@@ -1,4 +1,4 @@
-﻿namespace WindowsJedi.Components
+﻿namespace WindowsJedi.Features
 {
     using System;
     using WindowsJedi.WinApis;

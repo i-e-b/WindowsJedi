@@ -1,10 +1,11 @@
-﻿using System;
-using System.Threading;
-using System.Windows.Forms;
-using WindowsJedi.WinApis;
+﻿namespace WindowsJedi.Features {
+    using System;
+    using System.Threading;
+    using System.Windows.Forms;
+    using WindowsJedi.Components;
+    using WindowsJedi.WinApis;
 
-namespace WindowsJedi.Components {
-	/// <summary>
+    /// <summary>
 	/// A form which covers all screens and places itself behind another window
 	/// </summary>
 	public class ConcentrationForm : FullScreenForm {

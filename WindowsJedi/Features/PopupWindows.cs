@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using WindowsJedi.WinApis;
-
-namespace WindowsJedi.Components
+﻿namespace WindowsJedi.Features
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using WindowsJedi.WinApis;
+
     public class PopupWindows : IDisposable
     {
         readonly List<Window> _hiddenWindows, _fadedWindows;
