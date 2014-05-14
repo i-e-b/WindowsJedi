@@ -67,6 +67,15 @@
     <Compile Include="Components\ClickInvisibleFullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Components\DraggableOverlayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Components\NonHitOverlayForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Components\WindowIconTitledForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Features\ConcentrationForm.cs">
       <SubType>Form</SubType>
     </Compile>
