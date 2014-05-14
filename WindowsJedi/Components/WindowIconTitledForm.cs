@@ -37,15 +37,16 @@ namespace WindowsJedi.Components
             new Thread(() =>
             {
                 _icon = targetWindow.GetAppIcon();
-                try
-                {
-                    Invoke(new UpdateDelegate(UpdateOverlay));
-                }
-                catch
-                {
-                    Ignore(); // If the icon is found quickly, the underlying window won't be ready
-                }
+                try { Invoke(new UpdateDelegate(UpdateOverlay)); }
+                catch { Ignore(); } // If the icon is found quickly, the underlying window won't be ready
+
             }) { IsBackground = true }.Start();
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            UpdateOverlay();
+            base.OnActivated(e);
         }
 
         static void Ignore() { } 
@@ -70,7 +71,6 @@ namespace WindowsJedi.Components
             using (var g = Graphics.FromImage(b))
             {
                 g.Clear(Color.FromArgb(128,0,0,0));
-                //g.CompositingMode = CompositingMode.SourceOver;
                 g.CompositingQuality = CompositingQuality.HighQuality;
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 g.TextRenderingHint = TextRenderingHint.AntiAlias; // clear type can look weird

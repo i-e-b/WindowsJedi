@@ -77,7 +77,6 @@
             Win32.SetForegroundWindow(Handle);
             _showing = true;
             ShowOverlays();
-
         }
 
         void ShowOverlays()
@@ -109,12 +108,17 @@
 
         void HideOverlays()
         {
-            foreach (var form in _overlays)
+            var local = _overlays.ToArray();
+            _overlays.Clear();
+
+            foreach (var form in local)
             {
                 form.Close();
+            }
+            foreach (var form in _overlays)
+            {
                 form.Dispose();
             }
-            _overlays.Clear();
         }
 
         public void HideSwitcher()
