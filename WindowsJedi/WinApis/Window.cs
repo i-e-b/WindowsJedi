@@ -8,7 +8,8 @@ namespace WindowsJedi.WinApis {
     /// <summary>
     /// A DWM wrapper around a Win32 windows handle
     /// </summary>
-	public class Window :IDisposable {
+    public class Window : IDisposable
+    {
 		private string _title;
         private readonly IntPtr _handle;
         private IntPtr _dwmThumb;
@@ -16,6 +17,11 @@ namespace WindowsJedi.WinApis {
 		public Window(IntPtr handle) {
 			_handle = handle;
 		}
+
+        public Window(IntPtr handle, string title): this(handle)
+        {
+            _title = title;
+        }
 
         ~Window()
         {

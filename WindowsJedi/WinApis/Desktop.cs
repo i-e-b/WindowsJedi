@@ -1,15 +1,50 @@
-﻿using System;
-using System.Threading;
-using System.Collections;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Collections.Specialized;
+﻿namespace WindowsJedi.WinApis {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Specialized;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Threading;
 
-namespace WindowsJedi.WinApis {
     /// <summary>
     /// Wrapper around Win32 desktops api
     /// </summary>
 	public class Desktop : IDisposable, ICloneable {
+        public const long AccessRights = DESKTOP_JOURNALRECORD | DESKTOP_JOURNALPLAYBACK | DESKTOP_CREATEWINDOW | DESKTOP_ENUMERATE | DESKTOP_WRITEOBJECTS | DESKTOP_SWITCHDESKTOP | DESKTOP_CREATEMENU | DESKTOP_HOOKCONTROL | DESKTOP_READOBJECTS;
+        public const long DESKTOP_CREATEMENU = 0x0004L;
+        public const long DESKTOP_CREATEWINDOW = 0x0002L;
+        public const long DESKTOP_ENUMERATE = 0x0040L;
+        public const long DESKTOP_HOOKCONTROL = 0x0008L;
+        public const long DESKTOP_JOURNALPLAYBACK = 0x0020L;
+        public const long DESKTOP_JOURNALRECORD = 0x0010L;
+        public const long DESKTOP_READOBJECTS = 0x0001L;
+        public const long DESKTOP_SWITCHDESKTOP = 0x0100L;
+        public const long DESKTOP_WRITEOBJECTS = 0x0080L;
+        /// <summary>
+        /// Size of buffer used when retrieving window names.
+        /// </summary>
+        public const int MaxWindowNameLength = 100;
+        public const int NORMAL_PRIORITY_CLASS = 0x00000020;
+        public const int STARTF_USEPOSITION = 0x00000004;
+        public const int STARTF_USESHOWWINDOW = 0x00000001;
+        public const int STARTF_USESTDHANDLES = 0x00000100;
+        public const short SW_HIDE = 0;
+        public const short SW_NORMAL = 1;
+        public const int UOI_NAME = 2;
+        /// <summary>
+        /// Opens the default desktop.
+        /// </summary>
+        public static readonly Desktop Default = OpenDefaultDesktop();
+
+        /// <summary>
+        /// Opens the desktop the user if viewing.
+        /// </summary>
+        public static readonly Desktop Input = OpenInputDesktop();
+        private readonly List<IntPtr> _windows;
+        private static StringCollection mSc;
+        private IntPtr _desktop;
+        private bool _disposed;
 
         /// <summary>
         /// Creates a new Desktop object.
@@ -17,25 +52,85 @@ namespace WindowsJedi.WinApis {
         public Desktop()
         {
             // init variables.
-            m_desktop = IntPtr.Zero;
-            m_desktopName = String.Empty;
-            m_windows = new ArrayList();
-            m_disposed = false;
+            _desktop = IntPtr.Zero;
+            DesktopName = String.Empty;
+            _windows = new List<IntPtr>();
+            _disposed = false;
         }
 
-        // constructor is private to prevent invalid handles being passed to it.
+        /// <summary>
+        ///  constructor is private to prevent invalid handles being passed to it.
+        /// </summary>
         private Desktop(IntPtr desktop)
         {
             // init variables.
-            m_desktop = desktop;
-            m_desktopName = Desktop.GetDesktopName(desktop);
-            m_windows = new ArrayList();
-            m_disposed = false;
+            _desktop = desktop;
+            DesktopName = GetDesktopName(desktop);
+            _windows = new List<IntPtr>();
+            _disposed = false;
         }
 
         ~Desktop()
         {
             Dispose(false);
+        }
+
+        private delegate bool EnumDesktopProc (string lpszDesktop, IntPtr lParam);
+        private delegate bool EnumDesktopWindowsProc (IntPtr desktopHandle, IntPtr lParam);
+
+        /// <summary>
+        /// Gets a handle to the desktop, IntPtr.Zero if no desktop open.
+        /// </summary>
+        public IntPtr DesktopHandle {
+            get {
+                return _desktop;
+            }
+        }
+        /// <summary>
+        /// Gets the name of the desktop, returns null if no desktop is open.
+        /// </summary>
+        public string DesktopName { get; private set; }
+        /// <summary>
+        /// Gets if a desktop is open.
+        /// </summary>
+        public bool IsOpen {
+            get {
+                return (_desktop != IntPtr.Zero);
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PROCESS_INFORMATION {
+            // ReSharper disable FieldCanBeMadeReadOnly.Local, MemberCanBePrivate.Local
+            public IntPtr hProcess;
+            public IntPtr hThread;
+            public int dwProcessId;
+            public int dwThreadId;
+            // ReSharper restore FieldCanBeMadeReadOnly.Local, MemberCanBePrivate.Local
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct STARTUPINFO {
+            // ReSharper disable FieldCanBeMadeReadOnly.Local, MemberCanBePrivate.Local
+            public int cb;
+            public string lpReserved;
+            public string lpDesktop;
+            public string lpTitle;
+            public int dwX;
+            public int dwY;
+            public int dwXSize;
+            public int dwYSize;
+            public int dwXCountChars;
+            public int dwYCountChars;
+            public int dwFillAttribute;
+            public int dwFlags;
+            public short wShowWindow;
+            public short cbReserved2;
+            public IntPtr lpReserved2;
+            public IntPtr hStdInput;
+            public IntPtr hStdOutput;
+            public IntPtr hStdError;
+            // ReSharper restore FieldCanBeMadeReadOnly.Local, MemberCanBePrivate.Local
         }
 
         /// <summary>
@@ -56,22 +151,21 @@ namespace WindowsJedi.WinApis {
         /// <param name="disposing">True to dispose managed resources.</param>
         public virtual void Dispose(bool disposing)
         {
-            if (!m_disposed)
+            if (!_disposed)
             {
                 // dispose of managed resources,
                 // close handles
                 Close();
             }
 
-            m_disposed = true;
+            _disposed = true;
         }
 
-        #region Imports
-		[DllImport("kernel32.dll")]
-		private static extern int GetThreadId (IntPtr thread);
+        [DllImport("kernel32.dll")]
+		public static extern int GetThreadId (IntPtr thread);
 
 		[DllImport("kernel32.dll")]
-		private static extern int GetProcessId (IntPtr process);
+        public static extern int GetProcessId(IntPtr process);
 
 		//
 		// Imported winAPI functions.
@@ -126,162 +220,7 @@ namespace WindowsJedi.WinApis {
 		[DllImport("user32.dll")]
 		private static extern int GetWindowText (IntPtr hWnd, IntPtr lpString, int nMaxCount);
 
-		private delegate bool EnumDesktopProc (string lpszDesktop, IntPtr lParam);
-		private delegate bool EnumDesktopWindowsProc (IntPtr desktopHandle, IntPtr lParam);
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct PROCESS_INFORMATION {
-			public IntPtr hProcess;
-			public IntPtr hThread;
-			public int dwProcessId;
-			public int dwThreadId;
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		private struct STARTUPINFO {
-			public int cb;
-			public string lpReserved;
-			public string lpDesktop;
-			public string lpTitle;
-			public int dwX;
-			public int dwY;
-			public int dwXSize;
-			public int dwYSize;
-			public int dwXCountChars;
-			public int dwYCountChars;
-			public int dwFillAttribute;
-			public int dwFlags;
-			public short wShowWindow;
-			public short cbReserved2;
-			public IntPtr lpReserved2;
-			public IntPtr hStdInput;
-			public IntPtr hStdOutput;
-			public IntPtr hStdError;
-		}
-		#endregion
-
-		#region Constants
-		/// <summary>
-		/// Size of buffer used when retrieving window names.
-		/// </summary>
-		public const int MaxWindowNameLength = 100;
-
-		//
-		// winAPI constants.
-		//
-		private const short SW_HIDE = 0;
-		private const short SW_NORMAL = 1;
-		private const int STARTF_USESTDHANDLES = 0x00000100;
-		private const int STARTF_USESHOWWINDOW = 0x00000001;
-		private const int UOI_NAME = 2;
-		private const int STARTF_USEPOSITION = 0x00000004;
-		private const int NORMAL_PRIORITY_CLASS = 0x00000020;
-		private const long DESKTOP_CREATEWINDOW = 0x0002L;
-		private const long DESKTOP_ENUMERATE = 0x0040L;
-		private const long DESKTOP_WRITEOBJECTS = 0x0080L;
-		private const long DESKTOP_SWITCHDESKTOP = 0x0100L;
-		private const long DESKTOP_CREATEMENU = 0x0004L;
-		private const long DESKTOP_HOOKCONTROL = 0x0008L;
-		private const long DESKTOP_READOBJECTS = 0x0001L;
-		private const long DESKTOP_JOURNALRECORD = 0x0010L;
-		private const long DESKTOP_JOURNALPLAYBACK = 0x0020L;
-		private const long AccessRights = DESKTOP_JOURNALRECORD | DESKTOP_JOURNALPLAYBACK | DESKTOP_CREATEWINDOW | DESKTOP_ENUMERATE | DESKTOP_WRITEOBJECTS | DESKTOP_SWITCHDESKTOP | DESKTOP_CREATEMENU | DESKTOP_HOOKCONTROL | DESKTOP_READOBJECTS;
-		#endregion
-
-		#region Structures
-		/// <summary>
-		/// Stores window handles and titles.
-		/// </summary>
-		public struct Window {
-			#region Private Variables
-			private IntPtr m_handle;
-			private string m_text;
-			#endregion
-
-			#region Public Properties
-			/// <summary>
-			/// Gets the window handle.
-			/// </summary>
-			public IntPtr Handle {
-				get {
-					return m_handle;
-				}
-			}
-
-			/// <summary>
-			/// Gets teh window title.
-			/// </summary>
-			public string Text {
-				get {
-					return m_text;
-				}
-			}
-			#endregion
-
-			#region Construction
-			/// <summary>
-			/// Creates a new window object.
-			/// </summary>
-			/// <param name="handle">Window handle.</param>
-			/// <param name="text">Window title.</param>
-			public Window (IntPtr handle, string text) {
-				m_handle = handle;
-				m_text = text;
-			}
-			#endregion
-		}
-
-        #endregion
-
-		#region Private Variables
-		private IntPtr m_desktop;
-		private string m_desktopName;
-		private static StringCollection m_sc;
-		private ArrayList m_windows;
-		private bool m_disposed;
-		#endregion
-
-		#region Public Properties
-		/// <summary>
-		/// Gets if a desktop is open.
-		/// </summary>
-		public bool IsOpen {
-			get {
-				return (m_desktop != IntPtr.Zero);
-			}
-		}
-
-		/// <summary>
-		/// Gets the name of the desktop, returns null if no desktop is open.
-		/// </summary>
-		public string DesktopName {
-			get {
-				return m_desktopName;
-			}
-		}
-
-		/// <summary>
-		/// Gets a handle to the desktop, IntPtr.Zero if no desktop open.
-		/// </summary>
-		public IntPtr DesktopHandle {
-			get {
-				return m_desktop;
-			}
-		}
-
-		/// <summary>
-		/// Opens the default desktop.
-		/// </summary>
-		public static readonly Desktop Default = Desktop.OpenDefaultDesktop();
-
-		/// <summary>
-		/// Opens the desktop the user if viewing.
-		/// </summary>
-		public static readonly Desktop Input = Desktop.OpenInputDesktop();
-		#endregion
-
-
-		/// <summary>
+        /// <summary>
 		/// Creates a new desktop.  If a handle is open, it will be closed.
 		/// </summary>
 		/// <param name="name">The name of the new desktop.  Must be unique, and is case sensitive.</param>
@@ -290,24 +229,24 @@ namespace WindowsJedi.WinApis {
 			// make sure object isnt disposed.
 
 		    // close the open desktop.
-			if (m_desktop != IntPtr.Zero) {
+			if (_desktop != IntPtr.Zero) {
 				// attempt to close the desktop.
 				if (!Close()) return false;
 			}
 
 			// make sure desktop doesnt already exist.
-			if (Desktop.Exists(name)) {
+			if (Exists(name)) {
 				// it exists, so open it.
 				return Open(name);
 			}
 
 			// attempt to create desktop.
-			m_desktop = CreateDesktop(name, IntPtr.Zero, IntPtr.Zero, 0, AccessRights, IntPtr.Zero);
+			_desktop = CreateDesktop(name, IntPtr.Zero, IntPtr.Zero, 0, AccessRights, IntPtr.Zero);
 
-			m_desktopName = name;
+			DesktopName = name;
 
 			// something went wrong.
-			if (m_desktop == IntPtr.Zero) return false;
+			if (_desktop == IntPtr.Zero) return false;
 
 			return true;
 		}
@@ -320,14 +259,14 @@ namespace WindowsJedi.WinApis {
 			// make sure object isnt disposed.
 
 		    // check there is a desktop open.
-			if (m_desktop != IntPtr.Zero) {
+			if (_desktop != IntPtr.Zero) {
 				// close the desktop.
-				bool result = CloseDesktop(m_desktop);
+				var result = CloseDesktop(_desktop);
 
 				if (result) {
-					m_desktop = IntPtr.Zero;
+					_desktop = IntPtr.Zero;
 
-					m_desktopName = String.Empty;
+					DesktopName = String.Empty;
 				}
 
 				return result;
@@ -346,18 +285,18 @@ namespace WindowsJedi.WinApis {
 			// make sure object isnt disposed.
 
 		    // close the open desktop.
-			if (m_desktop != IntPtr.Zero) {
+			if (_desktop != IntPtr.Zero) {
 				// attempt to close the desktop.
 				if (!Close()) return false;
 			}
 
 			// open the desktop.
-			m_desktop = OpenDesktop(name, 0, true, AccessRights);
+			_desktop = OpenDesktop(name, 0, true, AccessRights);
 
 			// something went wrong.
-			if (m_desktop == IntPtr.Zero) return false;
+			if (_desktop == IntPtr.Zero) return false;
 
-			m_desktopName = name;
+			DesktopName = name;
 
 			return true;
 		}
@@ -370,19 +309,19 @@ namespace WindowsJedi.WinApis {
 			// make sure object isnt disposed.
 
 		    // close the open desktop.
-			if (m_desktop != IntPtr.Zero) {
+			if (_desktop != IntPtr.Zero) {
 				// attempt to close the desktop.
 				if (!Close()) return false;
 			}
 
 			// open the desktop.
-			m_desktop = OpenInputDesktop(0, true, AccessRights);
+			_desktop = OpenInputDesktop(0, true, AccessRights);
 
 			// something went wrong.
-			if (m_desktop == IntPtr.Zero) return false;
+			if (_desktop == IntPtr.Zero) return false;
 
 			// get the desktop name.
-			m_desktopName = Desktop.GetDesktopName(m_desktop);
+			DesktopName = GetDesktopName(_desktop);
 
 			return true;
 		}
@@ -395,10 +334,10 @@ namespace WindowsJedi.WinApis {
 			// make sure object isnt disposed.
 
 		    // make sure there is a desktop to open.
-			if (m_desktop == IntPtr.Zero) return false;
+			if (_desktop == IntPtr.Zero) return false;
 
 			// attempt to switch desktops.
-			bool result = SwitchDesktop(m_desktop);
+			var result = SwitchDesktop(_desktop);
 
 			return result;
 		}
@@ -407,28 +346,28 @@ namespace WindowsJedi.WinApis {
 		/// Enumerates the windows on a desktop.
 		/// </summary>
 		/// <returns>A window colleciton if successful, otherwise null.</returns>
-		public WindowCollection GetWindows () {
+        public List<Window> GetWindows()
+        {
 			// make sure object isnt disposed.
 
 		    // make sure a desktop is open.
 			if (!IsOpen) return null;
 
 			// init the arraylist.
-			m_windows.Clear();
-			WindowCollection windows = new WindowCollection();
+			_windows.Clear();
 
-			// get windows.
-			bool result = EnumDesktopWindows(m_desktop, new EnumDesktopWindowsProc(DesktopWindowsProc), IntPtr.Zero);
+		    // get windows.
+			var result = EnumDesktopWindows(_desktop, DesktopWindowsProc, IntPtr.Zero);
 
 			// check for error.
 			if (!result) return null;
 
 			// get window names.
-			windows = new WindowCollection();
+			var windows = new List<Window>();
 
-			IntPtr ptr = Marshal.AllocHGlobal(MaxWindowNameLength);
+			var ptr = Marshal.AllocHGlobal(MaxWindowNameLength);
 
-			foreach (IntPtr wnd in m_windows) {
+			foreach (var wnd in _windows) {
 				GetWindowText(wnd, ptr, MaxWindowNameLength);
 				windows.Add(new Window(wnd, Marshal.PtrToStringAnsi(ptr)));
 			}
@@ -440,7 +379,7 @@ namespace WindowsJedi.WinApis {
 
 		private bool DesktopWindowsProc (IntPtr wndHandle, IntPtr lParam) {
 			// add window handle to colleciton.
-			m_windows.Add(wndHandle);
+			_windows.Add(wndHandle);
 
 			return true;
 		}
@@ -457,14 +396,14 @@ namespace WindowsJedi.WinApis {
 			if (!IsOpen) return null;
 
 			// set startup parameters.
-			STARTUPINFO si = new STARTUPINFO();
+			var si = new STARTUPINFO();
 			si.cb = Marshal.SizeOf(si);
-			si.lpDesktop = m_desktopName;
+			si.lpDesktop = DesktopName;
 
-			PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
+			var pi = new PROCESS_INFORMATION();
 
 			// start the process.
-			bool result = CreateProcess(null, path, IntPtr.Zero, IntPtr.Zero, true, NORMAL_PRIORITY_CLASS, IntPtr.Zero, null, ref si, ref pi);
+			var result = CreateProcess(null, path, IntPtr.Zero, IntPtr.Zero, true, NORMAL_PRIORITY_CLASS, IntPtr.Zero, null, ref si, ref pi);
 
 			// error?
 			if (!result) return null;
@@ -486,13 +425,12 @@ namespace WindowsJedi.WinApis {
 			}
 		}
 
-		#region Static Methods
-		/// <summary>
+        /// <summary>
 		/// Enumerates all of the desktops.
 		/// </summary>
 		public static string[] GetDesktops () {
 			// attempt to enum desktops.
-			IntPtr windowStation = GetProcessWindowStation();
+			var windowStation = GetProcessWindowStation();
 
 			// check we got a valid handle.
 			if (windowStation == IntPtr.Zero) return new string[0];
@@ -500,15 +438,15 @@ namespace WindowsJedi.WinApis {
 			string[] desktops;
 
 			// lock the object. thread safety and all.
-			lock (m_sc = new StringCollection()) {
-				bool result = EnumDesktops(windowStation, new EnumDesktopProc(DesktopProc), IntPtr.Zero);
+			lock (mSc = new StringCollection()) {
+				var result = EnumDesktops(windowStation, DesktopProc, IntPtr.Zero);
 
 				// something went wrong.
 				if (!result) return new string[0];
 
 				//	// turn the collection into an array.
-				desktops = new string[m_sc.Count];
-				for (int i = 0; i < desktops.Length; i++) desktops[i] = m_sc[i];
+				desktops = new string[mSc.Count];
+				for (var i = 0; i < desktops.Length; i++) desktops[i] = mSc[i];
 			}
 
 			return desktops;
@@ -516,7 +454,7 @@ namespace WindowsJedi.WinApis {
 
 		private static bool DesktopProc (string lpszDesktop, IntPtr lParam) {
 			// add the desktop to the collection.
-			m_sc.Add(lpszDesktop);
+			mSc.Add(lpszDesktop);
 
 			return true;
 		}
@@ -528,9 +466,9 @@ namespace WindowsJedi.WinApis {
 		/// <returns>True if desktops were successfully switched.</returns>
 		public static bool Show (string name) {
 			// attmempt to open desktop.
-			bool result = false;
+			bool result;
 
-			using (Desktop d = new Desktop()) {
+			using (var d = new Desktop()) {
 				result = d.Open(name);
 
 				// something went wrong.
@@ -572,8 +510,8 @@ namespace WindowsJedi.WinApis {
 		/// <returns>If successful, a Desktop object, otherwise, null.</returns>
 		public static Desktop OpenDesktop (string name) {
 			// open the desktop.
-			Desktop desktop = new Desktop();
-			bool result = desktop.Open(name);
+			var desktop = new Desktop();
+			var result = desktop.Open(name);
 
 			// somethng went wrong.
 			if (!result) return null;
@@ -587,8 +525,8 @@ namespace WindowsJedi.WinApis {
 		/// <returns>If successful, a Desktop object, otherwise, null.</returns>
 		public static Desktop OpenInputDesktop () {
 			// open the desktop.
-			Desktop desktop = new Desktop();
-			bool result = desktop.OpenInput();
+			var desktop = new Desktop();
+			var result = desktop.OpenInput();
 
 			// somethng went wrong.
 			if (!result) return null;
@@ -602,7 +540,7 @@ namespace WindowsJedi.WinApis {
 		/// <returns>If successful, a Desktop object, otherwise, null.</returns>
 		public static Desktop OpenDefaultDesktop () {
 			// opens the default desktop.
-			return Desktop.OpenDesktop("Default");
+			return OpenDesktop("Default");
 		}
 
 		/// <summary>
@@ -612,10 +550,10 @@ namespace WindowsJedi.WinApis {
 		/// <returns>If successful, a Desktop object, otherwise, null.</returns>
 		public static Desktop CreateDesktop (string name) {
 			// open the desktop.
-			Desktop desktop = new Desktop();
-			bool result = desktop.Create(name);
+			var desktop = new Desktop();
+			var result = desktop.Create(name);
 
-			// somethng went wrong.
+			// something went wrong.
 			if (!result) return null;
 
 			return desktop;
@@ -644,14 +582,13 @@ namespace WindowsJedi.WinApis {
 			if (desktopHandle == IntPtr.Zero) return null;
 
 			// get the length of the name.
-			int needed = 0;
-			string name = String.Empty;
-			GetUserObjectInformation(desktopHandle, UOI_NAME, IntPtr.Zero, 0, ref needed);
+			var needed = 0;
+		    GetUserObjectInformation(desktopHandle, UOI_NAME, IntPtr.Zero, 0, ref needed);
 
 			// get the name.
-			IntPtr ptr = Marshal.AllocHGlobal(needed);
-			bool result = GetUserObjectInformation(desktopHandle, UOI_NAME, ptr, needed, ref needed);
-			name = Marshal.PtrToStringAnsi(ptr);
+			var ptr = Marshal.AllocHGlobal(needed);
+			var result = GetUserObjectInformation(desktopHandle, UOI_NAME, ptr, needed, ref needed);
+			var name = Marshal.PtrToStringAnsi(ptr);
 			Marshal.FreeHGlobal(ptr);
 
 			// something went wrong.
@@ -666,7 +603,7 @@ namespace WindowsJedi.WinApis {
 		/// <param name="name">The name of the desktop.</param>
 		/// <returns>True if the desktop exists, otherwise false.</returns>
 		public static bool Exists (string name) {
-			return Desktop.Exists(name, false);
+			return Exists(name, false);
 		}
 
 		/// <summary>
@@ -677,10 +614,10 @@ namespace WindowsJedi.WinApis {
 		/// <returns>True if the desktop exists, otherwise false.</returns>
 		public static bool Exists (string name, bool caseInsensitive) {
 			// enumerate desktops.
-			string[] desktops = Desktop.GetDesktops();
+			var desktops = GetDesktops();
 
 			// return true if desktop exists.
-			foreach (string desktop in desktops) {
+			foreach (var desktop in desktops) {
 				if (caseInsensitive) {
 					// case insensitive, compare all in lower case.
 					if (desktop.ToLower() == name.ToLower()) return true;
@@ -699,10 +636,10 @@ namespace WindowsJedi.WinApis {
 		/// <param name="desktop">Desktop name.</param>
 		/// <returns>A Process object for the newly created process, otherwise, null.</returns>
 		public static Process CreateProcess (string path, string desktop) {
-			if (!Desktop.Exists(desktop)) return null;
+			if (!Exists(desktop)) return null;
 
 			// create the process.
-			Desktop d = Desktop.OpenDesktop(desktop);
+			var d = OpenDesktop(desktop);
 			return d.CreateProcess(path);
 		}
 
@@ -712,62 +649,46 @@ namespace WindowsJedi.WinApis {
 		/// <returns>An array of the processes.</returns>
 		public static Process[] GetInputProcesses () {
 			// get all processes.
-			Process[] processes = Process.GetProcesses();
+			var processes = Process.GetProcesses();
 
-			ArrayList m_procs = new ArrayList();
-
-			// get the current desktop name.
-			string currentDesktop = GetDesktopName(Desktop.Input.DesktopHandle);
+		    // get the current desktop name.
+			var currentDesktop = GetDesktopName(Input.DesktopHandle);
 
 			// cycle through the processes.
-			foreach (Process process in processes) {
-				// check the threads of the process - are they in this one?
-				foreach (ProcessThread pt in process.Threads) {
-					// check for a desktop name match.
-					if (GetDesktopName(GetThreadDesktop(pt.Id)) == currentDesktop) {
-						// found a match, add to list, and bail.
-						m_procs.Add(process);
-						break;
-					}
-				}
-			}
+		    var m_procs = processes.Where(process => 
+                process.Threads.Cast<ProcessThread>().Any(pt => GetDesktopName(GetThreadDesktop(pt.Id)) == currentDesktop)
+                ).ToList();
 
-			// put ArrayList into array.
-			Process[] procs = new Process[m_procs.Count];
+		    // put ArrayList into array.
+			var procs = new Process[m_procs.Count];
 
-			for (int i = 0; i < procs.Length; i++) procs[i] = (Process)m_procs[i];
+			for (var i = 0; i < procs.Length; i++) procs[i] = m_procs[i];
 
 			return procs;
 		}
-		#endregion
 
-
-		#region ICloneable
-		/// <summary>
+        /// <summary>
 		/// Creates a new Desktop object with the same desktop open.
 		/// </summary>
 		/// <returns>Cloned desktop object.</returns>
 		public object Clone () {
 			// make sure object isnt disposed.
 
-		    Desktop desktop = new Desktop();
+		    var desktop = new Desktop();
 
 			// if a desktop is open, make the clone open it.
-			if (IsOpen) desktop.Open(m_desktopName);
+			if (IsOpen) desktop.Open(DesktopName);
 
 			return desktop;
 		}
-		#endregion
 
-		#region Overrides
-		/// <summary>
+        /// <summary>
 		/// Gets the desktop name.
 		/// </summary>
 		/// <returns>The desktop name, or a blank string if no desktop open.</returns>
 		public override string ToString () {
 			// return the desktop name.
-			return m_desktopName;
+			return DesktopName;
 		}
-		#endregion
 	}
 }

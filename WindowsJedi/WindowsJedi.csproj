@@ -100,7 +100,6 @@
     </Compile>
     <Compile Include="WinApis\Data\LayeredWindowFlags.cs" />
     <Compile Include="WinApis\Window.cs" />
-    <Compile Include="WinApis\WindowCollection.cs" />
     <Compile Include="WinApis\WindowEnumeration.cs" />
     <Compile Include="WinApis\WindowHookManager.cs" />
     <Compile Include="HotkeyCore.cs" />
