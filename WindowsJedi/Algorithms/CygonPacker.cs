@@ -94,10 +94,8 @@ namespace WindowsJedi.Algorithms {
 	/// </remarks>
 	public class CygonRectanglePacker : RectanglePacker {
 
-		#region class SliceStartComparer
-
 		/// <summary>Compares the starting position of height slices</summary>
-		private class SliceStartComparer : IComparer<Point> {
+		sealed class SliceStartComparer : IComparer<Point> {
 
 			/// <summary>Provides a default instance for the anchor rank comparer</summary>
 			public static readonly SliceStartComparer Default = new SliceStartComparer();
@@ -111,8 +109,6 @@ namespace WindowsJedi.Algorithms {
 			}
 
 		}
-
-		#endregion
 
 		/// <summary>Initializes a new rectangle packer</summary>
 		/// <param name="packingAreaWidth">Maximum width of the packing area</param>

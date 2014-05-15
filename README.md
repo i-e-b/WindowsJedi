@@ -26,6 +26,7 @@ What it does
  
 Planned
 -------
+ * Virtual desktops - (send-to, move-to key) shortcuts like XMonad
  * 'Reference window' - for dual monitor setup, a window marked reference always stays on the opposite monitor
    as the current focused window (so it's always visible to the side)
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
