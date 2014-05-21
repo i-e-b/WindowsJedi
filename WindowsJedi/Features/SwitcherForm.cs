@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Drawing;
     using System.Globalization;
     using System.Linq;
@@ -17,12 +18,17 @@
     /// </summary>
     public class SwitcherForm : ClickInvisibleFullScreenForm
     {
+        readonly WindowHookManager _winHook;
+
         [StructLayout(LayoutKind.Sequential)]
         private struct PassThroughKey
         {
             public Keys Key;
             public bool Up;
         }
+
+        private static readonly object SwitchLock = new object();
+
         private volatile bool _showing;
         private readonly List<Window> _windows;
         readonly List<Form> _overlays;
@@ -35,8 +41,9 @@
         const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 
-        public SwitcherForm()
+        public SwitcherForm(WindowHookManager winHook)
         {
+            _winHook = winHook;
             _keyMgr = new KeyHookManager();
             _keyMgr.KeyDown += keyMgr_KeyDown;
             _keyMgr.KeyUp += keyMgr_KeyUp;
@@ -45,13 +52,35 @@
             _passThroughKeys = new Queue<PassThroughKey>();
             _windows = new List<Window>();
             _overlays = new List<Form>();
+
+            _winHook.WindowCreated += _winHook_WindowSetChanged;
+            _winHook.WindowDestroyed += _winHook_WindowSetChanged;
+        }
+
+        void _winHook_WindowSetChanged(object sender, WinApis.ManagedEvents.WindowHandleEventArgs e)
+        {
+            if (_showing && WindowSetChanged())
+            {
+                Debug.WriteLine("refresh");
+                Redisplay(true);
+            }
+        }
+
+        bool WindowSetChanged()
+        {
+            var current = new HashSet<Window>(_windows);
+            var updated = new HashSet<Window>(FilteredWindowList());
+            return ! current.SetEquals(updated);
         }
 
         protected override void Dispose(bool disposing)
         {
+            _winHook.WindowCreated -= _winHook_WindowSetChanged;
+            _winHook.WindowDestroyed -= _winHook_WindowSetChanged;
             _keyMgr.Stop();
             _keyMgr.Dispose();
             HideSwitcher();
+            HideOverlays();
             base.Dispose(disposing);
         }
 
@@ -60,23 +89,29 @@
         /// </summary>
         public void Toggle()
         {
-            if (_showing) HideSwitcher();
-            else ShowSwitcher();
+            lock (SwitchLock)
+            {
+                if (_showing) HideSwitcher();
+                else ShowSwitcher();
+            }
         }
 
         public void ShowSwitcher()
         {
-            _closeMode = false;
-            HideOverlays();
-            Opacity = 1;
-            _showingPopups = ShowPopupsInitially;
-            GetAndPackWindows(_showingPopups);
-            ShowDwmThumbs();
-            Show();
-            TopMost = true;
-            Win32.SetForegroundWindow(Handle);
-            _showing = true;
-            ShowOverlays();
+            lock (SwitchLock)
+            {
+                _closeMode = false;
+                HideOverlays();
+                Opacity = 1;
+                _showingPopups = ShowPopupsInitially;
+                GetAndPackWindows(_showingPopups);
+                ShowDwmThumbs();
+                Show();
+                TopMost = true;
+                Win32.SetForegroundWindow(Handle);
+                _showing = true;
+                ShowOverlays();
+            }
         }
 
         void ShowOverlays()
@@ -123,11 +158,14 @@
 
         public void HideSwitcher()
         {
-            _showing = false;
-            HideOverlays();
-            HideDwmThumbs();
-            TopMost = false;
-            Hide();
+            lock (SwitchLock)
+            {
+                _showing = false;
+                HideOverlays();
+                HideDwmThumbs();
+                TopMost = false;
+                Hide();
+            }
         }
 
         #region Input handling & lock-down
@@ -298,21 +336,29 @@
 
         void Redisplay(bool Repack)
         {
-            HideOverlays();
-            HideDwmThumbs();
-            if (Repack) GetAndPackWindows(_showingPopups);
-            ShowDwmThumbs();
-            ShowOverlays();
-            Invalidate();
+            lock (SwitchLock)
+            {
+                HideOverlays();
+                HideDwmThumbs();
+                if (Repack) GetAndPackWindows(_showingPopups);
+                ShowDwmThumbs();
+                ShowOverlays();
+                Invalidate();
+            }
+        }
+
+        IEnumerable<Window> FilteredWindowList()
+        {
+            return WindowEnumeration.GetCurrentWindows()
+                .Where(w => (!w.IsPopup) || _showingPopups)
+                .Where(NotInIgnoreList);
         }
 
         #region Thumbnails
         private void GetAndPackWindows(bool showPopups)
         {
             _windows.Clear();
-            _windows.AddRange(WindowEnumeration.GetCurrentWindows()
-                .Where(w => (!w.IsPopup) || showPopups)
-                .Where(NotInIgnoreList));
+            _windows.AddRange(FilteredWindowList());
 
             var scale = 0.7;
             if (_windows.Count > 15) scale = 0.5;

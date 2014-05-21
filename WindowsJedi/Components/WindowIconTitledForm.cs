@@ -6,7 +6,6 @@ namespace WindowsJedi.Components
     using System.Drawing.Imaging;
     using System.Drawing.Text;
     using System.Threading;
-    using System.Threading.Tasks;
     using WindowsJedi.WinApis;
 
     /// <summary>
@@ -20,7 +19,6 @@ namespace WindowsJedi.Components
         readonly string _title;
         readonly string _subtitle;
         readonly Rectangle _rect;
-        readonly Task _iconTask;
         Icon _icon;
 
         /// <summary>
@@ -36,13 +34,17 @@ namespace WindowsJedi.Components
             _subtitle = subtitle;
             _rect = targetRectangle;
 
-            _iconTask = Task.Factory.StartNew(() =>
+            ThreadPool.QueueUserWorkItem(o =>
             {
                 _icon = targetWindow.GetAppIcon();
+
                 try { Invoke(new UpdateDelegate(UpdateOverlay)); }
                 catch { Ignore(); } // If the icon is found quickly, the underlying window won't be ready
+
                 Thread.Sleep(10);
-                Invoke(new UpdateDelegate(UpdateOverlay)); 
+
+                try { Invoke(new UpdateDelegate(UpdateOverlay)); }
+                catch { Ignore(); } // Window may have been destroyed by now
             });
         }
 
@@ -113,7 +115,6 @@ namespace WindowsJedi.Components
                 _icon.Dispose();
                 _icon = null;
             }
-            _iconTask.Dispose();
             base.Dispose(disposing);
         }
 

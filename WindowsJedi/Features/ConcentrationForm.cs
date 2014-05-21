@@ -4,6 +4,7 @@
     using System.Windows.Forms;
     using WindowsJedi.Components;
     using WindowsJedi.WinApis;
+    using WindowsJedi.WinApis.ManagedEvents;
 
     /// <summary>
 	/// A form which covers all screens and places itself behind another window
@@ -14,14 +15,13 @@
 		private volatile bool _locking;
 		private readonly WindowHookManager _winHook;
 
-		public ConcentrationForm () {
+		public ConcentrationForm (WindowHookManager winHook) {
 			Name = "WindowsJedi Concentration Veil";
-			_winHook = new WindowHookManager();
+            _winHook = winHook;
 		}
 
         protected override void Dispose(bool disposing)
         {
-            _winHook.Dispose();
 			UnConcentrate();
             base.Dispose(disposing);
         }
@@ -78,7 +78,7 @@
         /// <summary>
         /// Event handler tries to force focused window to the front
         /// </summary>
-        void winHook_WindowFocusChanged(object sender, WindowFocusChangedEventArgs e)
+        void winHook_WindowFocusChanged(object sender, WindowHandleEventArgs e)
         {
             if (!Win32.LockSetForegroundWindow(Win32.LSFW_UNLOCK)) { }
             if (_locking && (e.WindowHandle != Handle) && (e.WindowHandle != _currentWindow))

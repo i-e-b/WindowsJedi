@@ -13,7 +13,6 @@
         public static NotifyTrayApp Notify;
         public static ShellEventsDelegateForm ShellEventsDelegateForm;
 
-
 		[STAThread]
 		static void Main () {
 			InitialiseWinForms();
@@ -21,30 +20,35 @@
             // Hook 'shell' events into the capturing form.
             Win32.RegisterShellHookWindow(ShellEventsDelegateForm.Handle);
 
-            using (var switcherForm = new SwitcherForm())
-            using (var concentrationForm = new ConcentrationForm())
-            using (var popupWindows = new PopupWindows())
-            using (var pushback = new Pushback())
-            //using (var experimental = new Experimental())
-            using (var hotKeys = new HotkeyCore())
+            // Hook into system wide windowing events
+            using (var winHook = new WindowHookManager())
             {
-                hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
-                hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
-                hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.ToggleVisibility);
-                hotKeys.Bind(new[] { Keys.LControlKey, Keys.LWin, Keys.Space }, popupWindows.ToggleFade);
-                hotKeys.Bind(new[] { Keys.LWin, Keys.Escape }, pushback.PushBackFrontWindow);
 
-                //hotKeys.Bind(new[] { Keys.LWin, Keys.A }, experimental.HideForegroundWindow);
+                using (var switcherForm = new SwitcherForm(winHook))
+                using (var concentrationForm = new ConcentrationForm(winHook))
+                using (var popupWindows = new PopupWindows())
+                using (var pushback = new Pushback())
+                //using (var experimental = new Experimental())
+                using (var hotKeys = new HotkeyCore())
+                {
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
+                    hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.ToggleVisibility);
+                    hotKeys.Bind(new[] { Keys.LControlKey, Keys.LWin, Keys.Space }, popupWindows.ToggleFade);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Escape }, pushback.PushBackFrontWindow);
 
-                Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
-                Notify.AddMenuItem("Settings", delegate { (new Settings()).ShowDialog(); });
+                    //hotKeys.Bind(new[] { Keys.LWin, Keys.A }, experimental.HideForegroundWindow);
 
-                Application.ThreadException += Application_ThreadException;
+                    Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
+                    Notify.AddMenuItem("Settings", delegate { (new Settings()).ShowDialog(); });
 
-                Application.Run();
+                    Application.ThreadException += Application_ThreadException;
 
+                    Application.Run();
+
+                }
+                ShellEventsDelegateForm.Dispose();
             }
-            ShellEventsDelegateForm.Dispose();
 		}
 
 		static void Application_ThreadException (object sender, ThreadExceptionEventArgs e) {

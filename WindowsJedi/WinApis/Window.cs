@@ -8,9 +8,10 @@ namespace WindowsJedi.WinApis {
     /// <summary>
     /// A DWM wrapper around a Win32 windows handle
     /// </summary>
-    public class Window : IDisposable
+    public class Window : IDisposable, IEquatable<Window>
     {
-		private string _title;
+
+        private string _title;
         private readonly IntPtr _handle;
         private IntPtr _dwmThumb;
 
@@ -37,6 +38,20 @@ namespace WindowsJedi.WinApis {
         public void Dispose()
         {
             Dispose(true);
+        }
+
+        public override int GetHashCode()
+        {
+            return _handle.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            return obj is Window && Equals((Window)obj);
+        }
+
+        public bool Equals(Window other)
+        {
+            return _handle == other._handle;
         }
 
         public override string ToString () {
@@ -317,6 +332,16 @@ namespace WindowsJedi.WinApis {
         private static bool WindowIsVisible(IntPtr target)
         {
             return ((ulong)Win32.GetWindowLongPtr(target, Win32.GWL_STYLE).ToInt64() & Win32.WS_VISIBLE) != 0;
+        }
+
+        /// <summary>
+        ///  Get process id for a window by it's window handle
+        /// </summary>
+        public static uint WindowProcess(IntPtr hWnd)
+        {
+            uint processid;
+            Win32.GetWindowThreadProcessId(hWnd, out processid);
+            return processid;
         }
 
         /// <summary>

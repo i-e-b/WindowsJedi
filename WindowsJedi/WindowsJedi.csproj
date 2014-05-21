@@ -101,6 +101,7 @@
     <Compile Include="WinApis\Data\LayeredWindowFlags.cs" />
     <Compile Include="WinApis\Window.cs" />
     <Compile Include="WinApis\WindowEnumeration.cs" />
+    <Compile Include="WinApis\ManagedEvents\WindowFocusChangedEventArgs.cs" />
     <Compile Include="WinApis\WindowHookManager.cs" />
     <Compile Include="HotkeyCore.cs" />
     <Compile Include="WinApis\KeyHookManager.cs" />

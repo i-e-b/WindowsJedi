@@ -234,7 +234,16 @@ namespace WindowsJedi.WinApis {
         public const int HCBT_SETFOCUS = 9;
 
         public const uint WINEVENT_OUTOFCONTEXT = 0;
+        public const uint WINEVENT_SKIPOWNPROCESS = 2;
+
         public const uint EVENT_SYSTEM_FOREGROUND = 3;
+        public const uint EVENT_OBJECT_CREATE = 0x8000;
+        public const uint EVENT_OBJECT_DESTROY = 0x8001;
+
+        public const uint EVENT_MIN = 0x00000001;
+        public const uint EVENT_MAX = 0x7FFFFFFF;
+
+        public const uint OBJID_WINDOW = 0x00000000;
         #endregion
 
         #region Window redraw flags
@@ -452,10 +461,12 @@ namespace WindowsJedi.WinApis {
 
         [DllImport("user32.dll")]
         public static extern bool RegisterShellHookWindow(IntPtr handle);
-		#endregion
 
-		#region DWM api
-		[DllImport("dwmapi.dll")]
+        [DllImport("user32.dll")]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+        #endregion
+        #region DWM api
+        [DllImport("dwmapi.dll")]
 		public static extern int DwmRegisterThumbnail (IntPtr dest, IntPtr src, out IntPtr thumb);
 
 		[DllImport("dwmapi.dll")]
