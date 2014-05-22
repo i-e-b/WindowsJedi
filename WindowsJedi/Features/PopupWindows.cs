@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using WindowsJedi.WinApis;
 
     public class PopupWindows : IDisposable
@@ -18,36 +19,38 @@
 
         public void ToggleVisibility()
         {
-            lock (Lock)
+            ThreadPool.QueueUserWorkItem(o =>
             {
-                if (_hiddenWindows.All(Closed))
+                lock (Lock)
                 {
-                    _hiddenWindows.Clear();
-                    foreach (var window in _hiddenWindows)
+                    if (_hiddenWindows.All(Closed))
                     {
-                        window.Dispose();
-                    }
-                    _hiddenWindows.Clear();
-                }
-
-                if (_hiddenWindows.Any())
-                {
-                    ShowHiddenWindows();
-                }
-                else
-                {
-                    foreach (var window in WindowEnumeration.GetCurrentWindows())
-                    {
-                        if (!window.IsPopup || !window.IsVisible)
+                        foreach (var window in _hiddenWindows)
                         {
                             window.Dispose();
-                            continue;
                         }
-                        window.Hide();
-                        _hiddenWindows.Add(window);
+                        _hiddenWindows.Clear();
+                    }
+
+                    if (_hiddenWindows.Any())
+                    {
+                        ShowHiddenWindows();
+                    }
+                    else
+                    {
+                        foreach (var window in WindowEnumeration.GetCurrentWindows())
+                        {
+                            if (!window.IsPopup || !window.IsVisible)
+                            {
+                                window.Dispose();
+                                continue;
+                            }
+                            window.Hide();
+                            _hiddenWindows.Add(window);
+                        }
                     }
                 }
-            }
+            });
         }
 
         void ShowHiddenWindows()

@@ -59,11 +59,14 @@
 
         void _winHook_WindowSetChanged(object sender, WinApis.ManagedEvents.WindowHandleEventArgs e)
         {
-            if (_showing && WindowSetChanged())
+            if (!_showing || !WindowSetChanged())
             {
-                Debug.WriteLine("refresh");
-                Redisplay(true);
+                return;
             }
+
+            TopMost = true;
+            Win32.SetForegroundWindow(Handle);
+            Redisplay(true);
         }
 
         bool WindowSetChanged()
