@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Drawing;
     using System.Globalization;
     using System.Linq;
@@ -35,7 +34,6 @@
         private readonly KeyHookManager _keyMgr;
         private readonly Queue<PassThroughKey> _passThroughKeys;
         bool _showingPopups;
-        bool _closeMode;
 
         const bool ShowPopupsInitially = false;
         const string SelectorKeys = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -48,7 +46,6 @@
             _keyMgr.KeyDown += keyMgr_KeyDown;
             _keyMgr.KeyUp += keyMgr_KeyUp;
             KeyPreview = true;
-            _closeMode = false;
             _passThroughKeys = new Queue<PassThroughKey>();
             _windows = new List<Window>();
             _overlays = new List<Form>();
@@ -103,7 +100,6 @@
         {
             lock (SwitchLock)
             {
-                _closeMode = false;
                 HideOverlays();
                 Opacity = 1;
                 _showingPopups = ShowPopupsInitially;
@@ -171,28 +167,10 @@
             }
         }
 
-        #region Input handling & lock-down
-        /// <summary>
-        /// Switch to a window if user clicks on it's tile
-        /// </summary>
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            if (!_showing) return;
-            foreach (var window in _windows)
-            {
-                if (window.TargetRectangle == null) continue;
-
-                if (window.TargetRectangle.Value.Contains(e.Location))
-                {
-                    window.Focus();
-                    HideSwitcher();
-                }
-            }
-        }
+        #region Input lock-down
 
         void keyMgr_KeyUp(object sender, KeyEventArgs e)
         {
-            HandleKeyUp(e.KeyData);
             if (_showing)
             {
                 GenerateKey(Keys.F24, true);
@@ -271,11 +249,21 @@
 
         #endregion
 
-        void HandleKeyUp(Keys k)
+        /// <summary>
+        /// Switch to a window if user clicks on it's tile
+        /// </summary>
+        protected override void OnMouseClick(MouseEventArgs e)
         {
-            if (k == Keys.LShiftKey || k == Keys.RShiftKey)
+            if (!_showing) return;
+            foreach (var window in _windows)
             {
-                _closeMode = false;
+                if (window.TargetRectangle == null) continue;
+
+                if (window.TargetRectangle.Value.Contains(e.Location))
+                {
+                    window.Focus();
+                    HideSwitcher();
+                }
             }
         }
 
@@ -298,37 +286,16 @@
                 return true;
             }
 
-            if (k == Keys.LShiftKey || k == Keys.RShiftKey)
-            {
-                _closeMode = true;
-            }
-
-
             var converter = new KeysConverter();
             var ch = (converter.ConvertToString(k) ?? "").ToUpper();
             var idx = SelectorKeys.IndexOf(ch, StringComparison.Ordinal);
             if (idx < 0) return false;
             if (idx >= _windows.Count) return true;
 
-
-            if (_closeMode)
-            {
-                // close window, stay in the switcher
-                CloseAndRedisplay(_windows[idx]);
-            }
-            else
-            {
-                // Select and leave the switcher
-                _windows[idx].Focus();
-                HideSwitcher();
-            }
+            // Select and leave the switcher
+            _windows[idx].Focus();
+            HideSwitcher();
             return true;
-        }
-
-        void CloseAndRedisplay(Window w)
-        {
-            w.Close();
-            Redisplay(false);
         }
 
         void TogglePopups()
@@ -341,6 +308,7 @@
         {
             lock (SwitchLock)
             {
+                if (!_showing) return;
                 HideOverlays();
                 HideDwmThumbs();
                 if (Repack) GetAndPackWindows(_showingPopups);
