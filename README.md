@@ -32,6 +32,8 @@ Planned
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
  * Maybe: a focus-set, where a few windows are tiled together and the main one can be rotated in.
  * Maybe: hide cursor while typing, as just about no Windows apps do this correctly! 
+ * Mirror window: for presenting -- show a copy of a window on a different screen / location (may also include zoom?)
+ * Grid window position: using num-pad, like [Win]-[Left] etc, but with a quarters/thirds layout horz and vert.
 
 Todo / Bugs
 -----------
