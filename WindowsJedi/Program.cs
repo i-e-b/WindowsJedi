@@ -31,6 +31,8 @@
                 //using (var experimental = new Experimental())
                 using (var hotKeys = new HotkeyCore())
                 {
+                    hotKeys.Macro(new[] { Keys.LControlKey, Keys.Tab }, "    "); // for annoying text entry that does't do tabs 
+
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                     hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Space }, popupWindows.ToggleVisibility);

@@ -77,5 +77,14 @@ namespace WindowsJedi {
 		        binding.Value();
 		    }
 		}
-	}
+
+        /// <summary>
+        /// Convert an incoming key combination into an outgoing sequence of key presses.
+        /// <para>Uses SendKeys under the hood, so escaping rules and limitations apply</para>
+        /// </summary>
+        public void Macro(Keys[] incomingKeys, string outputString)
+        {
+            _bindings.Add(incomingKeys, () => SendKeys.Send(outputString));
+        }
+    }
 }
