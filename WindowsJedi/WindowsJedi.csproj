@@ -70,6 +70,7 @@
     <Compile Include="Components\DraggableOverlayForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Components\KeyboardSequence.cs" />
     <Compile Include="Components\NonHitOverlayForm.cs">
       <SubType>Form</SubType>
     </Compile>

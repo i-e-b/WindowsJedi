@@ -23,7 +23,7 @@
             // Hook into system wide windowing events
             using (var winHook = new WindowHookManager())
             {
-
+                
                 using (var switcherForm = new SwitcherForm(winHook))
                 using (var concentrationForm = new ConcentrationForm(winHook))
                 using (var popupWindows = new PopupWindows())
@@ -31,7 +31,7 @@
                 //using (var experimental = new Experimental())
                 using (var hotKeys = new HotkeyCore())
                 {
-                    hotKeys.Macro(new[] { Keys.LControlKey, Keys.Tab }, "    "); // for annoying text entry that does't do tabs 
+                    //hotKeys.Macro(new[] { Keys.LControlKey, Keys.Space }, new KeySequence().Up(Keys.LControlKey).Repeat(4, Keys.Space)); // for annoying text entry that does't do tabs 
 
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                     hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);

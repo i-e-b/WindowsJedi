@@ -6,6 +6,8 @@ using System.Windows.Forms;
 using WindowsJedi.WinApis;
 
 namespace WindowsJedi {
+    using WindowsJedi.Components;
+
     class HotkeyCore : IDisposable
     {
 		private readonly KeyHookManager _keyMgr;
@@ -49,7 +51,7 @@ namespace WindowsJedi {
 		private bool ShouldHandle () {
 			return _bindings.Any(b => _keyMgr.IsKeyComboPressed(b.Key));
 		}
-
+        
 		void keyMgr_KeyUp (object sender, KeyEventArgs e) {
 		    if (!ShouldHandle()) return;
 
@@ -77,14 +79,14 @@ namespace WindowsJedi {
 		        binding.Value();
 		    }
 		}
-
+        
         /// <summary>
         /// Convert an incoming key combination into an outgoing sequence of key presses.
-        /// <para>Uses SendKeys under the hood, so escaping rules and limitations apply</para>
+        /// Doesn't currently work with IE.
         /// </summary>
-        public void Macro(Keys[] incomingKeys, string outputString)
+        public void Macro(Keys[] incomingKeys, KeySequence outputKeys)
         {
-            _bindings.Add(incomingKeys, () => SendKeys.Send(outputString));
+            _bindings.Add(incomingKeys, outputKeys.PlayToFocusedWindow);
         }
     }
 }

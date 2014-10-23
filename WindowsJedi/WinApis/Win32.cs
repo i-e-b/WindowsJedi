@@ -315,6 +315,17 @@ namespace WindowsJedi.WinApis {
         [DllImport("user32.dll")]
         public static extern IntPtr SetActiveWindow(IntPtr targetWindow);
 
+        /// <summary>
+        /// Post a message to the event loop of the given window handle
+        /// </summary>
+        [DllImport("user32.dll")]
+        public static extern bool PostMessage(IntPtr targetWindow, UInt32 msg, int wparam, int lparam);
+
+        /// <summary>
+        /// Get window handle that has keyboard focus, or null if none.
+        /// </summary>
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetFocus();
 
         /// <summary>
         /// Returns true if handle is currently valid. It may not be your original window, use caution!

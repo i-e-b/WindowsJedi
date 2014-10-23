@@ -26,7 +26,7 @@ What it does
  
 Planned
 -------
- * Virtual desktops - (send-to, move-to key) shortcuts like XMonad
+ * Virtual desktops - (send-to, move-to key) shortcuts like XMonad (use window-under-cursor as target?)
  * 'Reference window' - for dual monitor setup, a window marked reference always stays on the opposite monitor
    as the current focused window (so it's always visible to the side)
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
@@ -40,7 +40,8 @@ Todo / Bugs
  * Win-Tab in focus mode should switch focus to selected window
  * Focus mode isn't strict enough. Should be more like switcher with only one item
  * Clean up the codebase
+ * Move mouse position to window when selecting with `win-tab`?
 
 Interesting code features
 -------------------------
-Stolen and adapted from a few places; there is multi-monitor full screen overlay, hot-key action hooks, and a fast box packing algorithm.
+Adapted from a few places; there is multi-monitor full screen overlay, hot-key action hooks, and a fast box packing algorithm.
