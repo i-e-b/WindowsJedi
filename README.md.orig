@@ -22,13 +22,15 @@ What it does
    a window set. Visibility toggle is conservative and system-wide. Stacking order is reversed on each display.
     `Ctrl-Win-Space` toggles translucency of popups, making them see-through.
  4. **Push-back** `Win-Escape` pushes the current foreground window to the back of the stack. Useful when you've got several reference windows open.
+<<<<<<< HEAD
  5. **Alignment** `Win-Alt-n` for n = 1 to 9, position windows on their current screen.
  6. **Screen-switch** `Win-<arrow>` move a window to a physical screen in that direction (does not wrap)
+=======
 
 Other stuff
 -----------
-There is a file typer that will play back keyboard events from the text of a 
-file to the active window. Useful for VM driving and badly behaved UIs.
+There is a file typer that will play back keyboard events from the text of a file to the active window. Useful for VM driving.
+>>>>>>> 00a2fd3... File re-typer
 
 Planned
 -------

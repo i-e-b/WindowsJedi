@@ -62,7 +62,10 @@
 
                     TrayIcon = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
                     TrayIcon.AddMenuItem("Settings", delegate { new Settings().ShowDialog(); });
+<<<<<<< HEAD
+=======
                     TrayIcon.AddMenuItem("Re-type file", delegate { new FileRetypeChooser().Show(); });
+>>>>>>> 00a2fd3... File re-typer
 
                     Application.ThreadException += Application_ThreadException;
 
