@@ -58,8 +58,10 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\CygonPacker.cs" />
@@ -85,6 +87,12 @@
     <Compile Include="Features\Pushback.cs" />
     <Compile Include="Components\UnclickableFullScreenForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserInterface\FileRetypeChooser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserInterface\FileRetypeChooser.Designer.cs">
+      <DependentUpon>FileRetypeChooser.cs</DependentUpon>
     </Compile>
     <Compile Include="WinApis\Desktop.cs" />
     <Compile Include="Components\ShellEventsDelegateForm.cs">
@@ -136,6 +144,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="UserInterface\FileRetypeChooser.resx">
+      <DependentUpon>FileRetypeChooser.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UserInterface\Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>

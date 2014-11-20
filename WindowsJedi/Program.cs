@@ -10,7 +10,7 @@
     using Settings = WindowsJedi.UserInterface.Settings;
 
     static class Program {
-        public static NotifyTrayApp Notify;
+        public static NotifyTrayApp TrayIcon;
         public static ShellEventsDelegateForm ShellEventsDelegateForm;
 
 		[STAThread]
@@ -41,8 +41,9 @@
 
                     //hotKeys.Bind(new[] { Keys.LWin, Keys.A }, experimental.HideForegroundWindow);
 
-                    Notify = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
-                    Notify.AddMenuItem("Settings", delegate { (new Settings()).ShowDialog(); });
+                    TrayIcon = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
+                    TrayIcon.AddMenuItem("Settings", delegate { new Settings().ShowDialog(); });
+                    TrayIcon.AddMenuItem("Re-type file", delegate { new FileRetypeChooser().Show(); });
 
                     Application.ThreadException += Application_ThreadException;
 

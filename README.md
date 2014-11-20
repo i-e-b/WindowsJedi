@@ -23,7 +23,11 @@ What it does
    a window set. Visibility toggle is conservative and system-wide. Stacking order is reversed on each display.
     `Ctrl-Win-Space` toggles translucency of popups, making them see-through.
  4. **Push-back** `Win-Escape` pushes the current foreground window to the back of the stack. Useful when you've got several reference windows open.
- 
+
+Other stuff
+-----------
+There is a file typer that will play back keyboard events from the text of a file to the active window. Useful for VM driving.
+
 Planned
 -------
  * Virtual desktops - (send-to, move-to key) shortcuts like XMonad (use window-under-cursor as target?)
