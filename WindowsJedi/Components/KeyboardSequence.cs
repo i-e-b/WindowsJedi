@@ -19,13 +19,26 @@
         {
             for (int i = 0; i < times; i++)
             {
-                _keyQueue.Add(new KeyState { Key = key, State = WmKeyEvent.Down });
+                Press(key);
             }
             return this;
         }
+
         public KeySequence Up(Keys key)
         {
             _keyQueue.Add(new KeyState { Key = key, State = WmKeyEvent.Up });
+            return this;
+        }
+
+        public KeySequence Down(Keys key)
+        {
+            _keyQueue.Add(new KeyState { Key = key, State = WmKeyEvent.Down });
+            return this;
+        }
+
+        public KeySequence Press(Keys keys)
+        {
+            Down(keys); Up(keys);
             return this;
         }
 
@@ -37,10 +50,32 @@
             foreach (var keyState in _keyQueue.ToArray())
             {
                 Win32.PostMessage(target, (UInt32)keyState.State, (int)keyState.Key, 0);
-                Thread.Sleep(100);
+                Thread.Sleep(5);
             }
         }
 
+        public void Clear()
+        {
+            _keyQueue.Clear();
+        }
+
+        public static void PlayStringToFocusedWindow(string str)
+        {
+            var ks = new KeySequence();
+            foreach (char c in str)
+            {
+                if (char.IsUpper(c))
+                {
+                    ks.Down((Keys)c);
+                }
+                else if (char.IsLower(c))
+                {
+                    ks.Down(Keys.ShiftKey | ((Keys)(char.ToUpper(c))));
+                }
+                ks.PlayToFocusedWindow();
+                ks.Clear();
+            }
+        }
     }
 
     public class KeyState

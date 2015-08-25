@@ -217,6 +217,7 @@ namespace WindowsJedi.WinApis {
         #region Window positioning flags
         public const uint SWP_NOSIZE = 0x0001;
         public const uint SWP_NOMOVE = 0x0002;
+        public const uint SWP_NOZORDER = 0x0004;
         #endregion
 
         #region Graphic Composition Flags
@@ -308,6 +309,13 @@ namespace WindowsJedi.WinApis {
         /// </summary>
         [DllImport("user32.dll")]
         public static extern IntPtr GetWindow(IntPtr targetWindow, WindowStack direction);
+
+
+        /// <summary>
+        /// Returns current active window IN THE CURRENT THREAD
+        /// </summary>
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetActiveWindow();
 
         /// <summary>
         /// Returns previous active window

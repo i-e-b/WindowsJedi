@@ -88,12 +88,6 @@
     <Compile Include="Components\UnclickableFullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UserInterface\FileRetypeChooser.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UserInterface\FileRetypeChooser.Designer.cs">
-      <DependentUpon>FileRetypeChooser.cs</DependentUpon>
-    </Compile>
     <Compile Include="WinApis\Desktop.cs" />
     <Compile Include="Components\ShellEventsDelegateForm.cs">
       <SubType>Form</SubType>
@@ -128,6 +122,7 @@
       <DependentUpon>Settings.cs</DependentUpon>
     </Compile>
     <Compile Include="WinApis\Data\WindowStack.cs" />
+    <Compile Include="Components\WindowArranger.cs" />
     <EmbeddedResource Include="Features\ConcentrationForm.resx">
       <DependentUpon>ConcentrationForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -144,9 +139,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UserInterface\FileRetypeChooser.resx">
-      <DependentUpon>FileRetypeChooser.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UserInterface\Settings.resx">
       <DependentUpon>Settings.cs</DependentUpon>
     </EmbeddedResource>

@@ -367,5 +367,19 @@ namespace WindowsJedi.WinApis {
         {
             Win32.SendMessage(_handle, Win32.WM_CLOSE, 0, 0);
         }
-	}
+
+        /// <summary>
+        /// Return the bounds of the screen that contains the most of this window.
+        /// Gives the working area, which excludes the taskbar
+        /// </summary>
+        public Rectangle ScreenRect()
+        {
+            return Screen.FromRectangle(NormalRectangle).WorkingArea;
+        }
+
+        public void SetBounds(int left, int top, int width, int height)
+        {
+            Win32.SetWindowPos(_handle, IntPtr.Zero, left, top, width, height, Win32.SWP_NOZORDER);
+        }
+    }
 }

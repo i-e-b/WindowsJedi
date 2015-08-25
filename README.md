@@ -16,17 +16,13 @@ What it does
    VisualStudio uses) are not shown by default.
    * Press quick-key to select a window and exit switcher
    * Press `tab` without `win` to toggle popups in the switcher.
-   * Hold shift and press quick-key to close a window
- 2. **Focus-mode** `RightShift-F12` dim other windows and make a best effort to prevent the focus-stealing that plagues Windows
+ 2. **Focus-mode** `Shift-F12` dim other windows and make a best effort to prevent the focus-stealing that plagues Windows
  3. **Hide popups**
     `Win-Space` toggles visibility of pop-up windows. This is handy when using Visual Studio's mess of
    a window set. Visibility toggle is conservative and system-wide. Stacking order is reversed on each display.
     `Ctrl-Win-Space` toggles translucency of popups, making them see-through.
  4. **Push-back** `Win-Escape` pushes the current foreground window to the back of the stack. Useful when you've got several reference windows open.
-
-Other stuff
------------
-There is a file typer that will play back keyboard events from the text of a file to the active window. Useful for VM driving.
+ 5. **Alignment** `Win-Alt-n` for n = 1 to 9, position windows on their current screen.
 
 Planned
 -------
