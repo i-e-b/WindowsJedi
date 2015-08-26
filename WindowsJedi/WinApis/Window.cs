@@ -381,5 +381,18 @@ namespace WindowsJedi.WinApis {
         {
             Win32.SetWindowPos(_handle, IntPtr.Zero, left, top, width, height, Win32.SWP_NOZORDER);
         }
+
+        public Screen PrimaryScreen()
+        {
+            return Screen.FromRectangle(NormalRectangle);
+        }
+
+        /// <summary>
+        /// Move window to a new position without changing size or Z-order
+        /// </summary>
+        public void MoveTo(Point newOffset)
+        {
+            Win32.SetWindowPos(_handle, IntPtr.Zero, newOffset.X, newOffset.Y, 0, 0, Win32.SWP_NOZORDER | Win32.SWP_NOSIZE);
+        }
     }
 }

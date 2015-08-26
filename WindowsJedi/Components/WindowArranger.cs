@@ -1,12 +1,57 @@
 ﻿namespace WindowsJedi.Components
 {
     using System;
+    using System.Drawing;
+    using System.Windows.Forms;
     using WindowsJedi.WinApis;
 
     class WindowArranger : IDisposable
     {
-        public void Dispose()
+        public void Dispose() { }
+
+
+        public void MoveScreenLeft() { MoveScreen(Direction.Left); }
+        public void MoveScreenUp() { MoveScreen(Direction.Up); }
+        public void MoveScreenRight() { MoveScreen(Direction.Right); }
+        public void MoveScreenDown() { MoveScreen(Direction.Down); }
+
+        public void MoveScreen(Direction dd)
         {
+            using (var w = Window.ForegroundWindow())
+            {
+                var currentScreenRect = w.ScreenRect();
+                var hw = currentScreenRect.Width / 2;
+                var hh = currentScreenRect.Height / 2;
+                var nextPoint = currentScreenRect.Location;
+                switch (dd)
+                {
+                    case Direction.Left:
+                        nextPoint.Offset(-1, hh);
+                        break;
+                    case Direction.Up:
+                        nextPoint.Offset(hw, -1);
+                        break;
+                    case Direction.Right:
+                        nextPoint.Offset(currentScreenRect.Width + 1, hh);
+                        break;
+                    case Direction.Down:
+                        nextPoint.Offset(hw, currentScreenRect.Height + 1);
+                        break;
+                }
+
+                var newScreen = Screen.FromPoint(nextPoint);
+
+                var newOffset = RepositionPoint(w.NormalRectangle.Location, currentScreenRect.Location, newScreen.WorkingArea.Location);
+
+                w.MoveTo(newOffset);
+            }
+        }
+
+        static Point RepositionPoint(Point oldLocation, Point oldOrigin, Point newOrigin)
+        {
+            var dx = newOrigin.X - oldOrigin.X;
+            var dy = newOrigin.Y - oldOrigin.Y;
+            return new Point(oldLocation.X + dx, oldLocation.Y + dy);
         }
 
         /// <summary>

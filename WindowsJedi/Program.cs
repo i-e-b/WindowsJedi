@@ -52,6 +52,12 @@
                     hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D8 }, arranger.SetBottom);
                     hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D9 }, arranger.SetBottomRight);
 
+                    // win-arrow to move screen
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Left }, arranger.MoveScreenLeft);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Up }, arranger.MoveScreenUp);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Right }, arranger.MoveScreenRight);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.Down }, arranger.MoveScreenDown);
+
                     //hotKeys.Bind(new[] { Keys.LWin, Keys.A }, experimental.HideForegroundWindow);
 
                     TrayIcon = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");

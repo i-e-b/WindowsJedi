@@ -2,7 +2,7 @@ Windows Jedi
 ============
 
 Tools for making working with Windows 7 more friendly.
-I don't know if it works in Windows 8.x -- let me know if you have a copy.
+I don't know if it works in Windows 8.x or 10 -- let me know if you have a copy.
 
 Requirements
 ------------
@@ -23,6 +23,7 @@ What it does
     `Ctrl-Win-Space` toggles translucency of popups, making them see-through.
  4. **Push-back** `Win-Escape` pushes the current foreground window to the back of the stack. Useful when you've got several reference windows open.
  5. **Alignment** `Win-Alt-n` for n = 1 to 9, position windows on their current screen.
+ 6. **Screen-switch** `Win-<arrow>` move a window to a physical screen in that direction (does not wrap)
 
 Planned
 -------
