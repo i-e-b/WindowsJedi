@@ -42,15 +42,15 @@
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Escape }, pushback.PushBackFrontWindow);
 
                     // re-arrangement of top-window that breaks less things than the Windows built-in
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D1 }, arranger.SetTopLeft);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D2 }, arranger.SetTop);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D3 }, arranger.SetTopRight);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D4 }, arranger.SetLeft);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D5 }, arranger.SetCentre);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D6 }, arranger.SetRight);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D7 }, arranger.SetBottomLeft);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D8 }, arranger.SetBottom);
-                    hotKeys.Bind(new[] { Keys.LWin, Keys.LMenu /*alt*/, Keys.D9 }, arranger.SetBottomRight);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D1 }, arranger.SetTopLeft);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D2 }, arranger.SetTop);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D3 }, arranger.SetTopRight);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D4 }, arranger.SetLeft);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D5 }, arranger.SetCentre);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D6 }, arranger.SetRight);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D7 }, arranger.SetBottomLeft);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D8 }, arranger.SetBottom);
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.LControlKey, Keys.D9 }, arranger.SetBottomRight);
 
                     // win-arrow to move screen
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Left }, arranger.MoveScreenLeft);
