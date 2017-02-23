@@ -29,11 +29,10 @@
                 using (var popupWindows = new PopupWindows())
                 using (var pushback = new Pushback())
                 using (var arranger = new WindowArranger())
-                //using (var experimental = new Experimental())
+                using (var experimental = new Experimental(winHook))
                 using (var hotKeys = new HotkeyCore())
                 {
-                    //hotKeys.Macro(new[] { Keys.LControlKey, Keys.Space }, new KeySequence().Up(Keys.LControlKey).Repeat(4, Keys.Space)); // for annoying text entry that does't do tabs 
-
+                    // General features
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Tab }, switcherForm.Toggle);
                     hotKeys.Bind(new[] { Keys.LShiftKey, Keys.F12 }, concentrationForm.Toggle);
                     hotKeys.Bind(new[] { Keys.RShiftKey, Keys.F12 }, concentrationForm.Toggle);
@@ -58,7 +57,8 @@
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Right }, arranger.MoveScreenRight);
                     hotKeys.Bind(new[] { Keys.LWin, Keys.Down }, arranger.MoveScreenDown);
 
-                    //hotKeys.Bind(new[] { Keys.LWin, Keys.A }, experimental.HideForegroundWindow);
+                    // Reference window
+                    hotKeys.Bind(new[] { Keys.LWin, Keys.OemMinus}, experimental.SetReferenceWindow);
 
                     TrayIcon = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
                     TrayIcon.AddMenuItem("Settings", delegate { new Settings().ShowDialog(); });

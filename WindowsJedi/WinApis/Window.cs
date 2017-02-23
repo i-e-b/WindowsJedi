@@ -171,6 +171,11 @@ namespace WindowsJedi.WinApis {
         }
 
         /// <summary>
+        /// Target window's handle
+        /// </summary>
+        public IntPtr Handle { get { return _handle; } }
+
+        /// <summary>
         /// Return approximate aspect ratio of the thumbnail DWM would show.
         /// </summary>
         public Size DwmThumbAspect()
@@ -288,6 +293,12 @@ namespace WindowsJedi.WinApis {
             return target == IntPtr.Zero ? null : new Window(target);
         }
 
+        public static Window ActiveWindow()
+        {
+            var target = Win32.GetActiveWindow();
+            return target == IntPtr.Zero ? null : new Window(target);
+        }
+
         /// <summary>
         /// Returns the next visible window below this one, or null if it's at the bottom
         /// </summary>
@@ -353,6 +364,15 @@ namespace WindowsJedi.WinApis {
         }
 
         /// <summary>
+        /// Send this Window to the front of the z-order stack
+        /// </summary>
+        public void SendToFront()
+        {
+            //Win32.SetWindowPos(_handle, Win32.HWND_TOP, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE | Win32.SWP_NOACTIVATE);
+            Win32.BringWindowToTop(_handle);
+        }
+
+        /// <summary>
         /// Move this window to directly under the target
         /// </summary>
         public void PutUnder(IntPtr targetHwnd)
@@ -382,6 +402,9 @@ namespace WindowsJedi.WinApis {
             Win32.SetWindowPos(_handle, IntPtr.Zero, left, top, width, height, Win32.SWP_NOZORDER);
         }
 
+        /// <summary>
+        /// Returns the screen that contains the most of this window
+        /// </summary>
         public Screen PrimaryScreen()
         {
             return Screen.FromRectangle(NormalRectangle);

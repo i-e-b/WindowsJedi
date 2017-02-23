@@ -9,41 +9,56 @@
     {
         public void Dispose() { }
 
-
         public void MoveScreenLeft() { MoveScreen(Direction.Left); }
         public void MoveScreenUp() { MoveScreen(Direction.Up); }
         public void MoveScreenRight() { MoveScreen(Direction.Right); }
         public void MoveScreenDown() { MoveScreen(Direction.Down); }
 
+        /// <summary>
+        /// Move a given window to a different screen by direction.
+        /// Does not wrap. Returns false if there is no screen available in that direction,
+        /// returns true if the window was moved.
+        /// </summary>
+        public static bool MoveWindowRelativeScreenDirection(Window toMove, Window relative, Direction dd)
+        {
+            var targetScreenRect = relative.ScreenRect();
+            var hw = targetScreenRect.Width / 2;
+            var hh = targetScreenRect.Height / 2;
+            var nextPoint = targetScreenRect.Location;
+            switch (dd)
+            {
+                case Direction.Left:
+                    nextPoint.Offset(-1, hh);
+                    break;
+                case Direction.Up:
+                    nextPoint.Offset(hw, -1);
+                    break;
+                case Direction.Right:
+                    nextPoint.Offset(targetScreenRect.Width + 1, hh);
+                    break;
+                case Direction.Down:
+                    nextPoint.Offset(hw, targetScreenRect.Height + 1);
+                    break;
+            }
+
+            var newScreen = Screen.FromPoint(nextPoint);
+            if (newScreen.Equals(relative.PrimaryScreen()))
+            {
+                return false; // no screen in this direction
+            }
+
+            var currentScreenRect = toMove.ScreenRect();
+            var newOffset = RepositionPoint(toMove.NormalRectangle.Location, currentScreenRect.Location, newScreen.WorkingArea.Location);
+
+            toMove.MoveTo(newOffset);
+            return true; // yes, we moved the screen
+        }
+
         public void MoveScreen(Direction dd)
         {
             using (var w = Window.ForegroundWindow())
             {
-                var currentScreenRect = w.ScreenRect();
-                var hw = currentScreenRect.Width / 2;
-                var hh = currentScreenRect.Height / 2;
-                var nextPoint = currentScreenRect.Location;
-                switch (dd)
-                {
-                    case Direction.Left:
-                        nextPoint.Offset(-1, hh);
-                        break;
-                    case Direction.Up:
-                        nextPoint.Offset(hw, -1);
-                        break;
-                    case Direction.Right:
-                        nextPoint.Offset(currentScreenRect.Width + 1, hh);
-                        break;
-                    case Direction.Down:
-                        nextPoint.Offset(hw, currentScreenRect.Height + 1);
-                        break;
-                }
-
-                var newScreen = Screen.FromPoint(nextPoint);
-
-                var newOffset = RepositionPoint(w.NormalRectangle.Location, currentScreenRect.Location, newScreen.WorkingArea.Location);
-
-                w.MoveTo(newOffset);
+                MoveWindowRelativeScreenDirection(w, w, dd);
             }
         }
 

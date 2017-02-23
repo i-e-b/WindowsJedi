@@ -4,8 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace WindowsJedi.WinApis {
     using System.Diagnostics;
-    using System.Linq;
-    using System.Threading;
     using WindowsJedi.WinApis.ManagedEvents;
 
     /// <summary>
@@ -15,13 +13,13 @@ namespace WindowsJedi.WinApis {
     {
 		private readonly IntPtr _windowsEventsHook;
         private GCHandle _focusedChangedEventPin, _hookDelegatePin;
-        int _ownProcessId;
+        readonly int _ownProcessId;
 
-        #region Events
         public event EventHandler<WindowHandleEventArgs> WindowFocusChanged;
         public event EventHandler<WindowHandleEventArgs> WindowCreated;
         public event EventHandler<WindowHandleEventArgs> WindowDestroyed;
 
+        #region Event Invocation
         /// <summary>
         /// Trigger the WindowFocusChanged event for a given window handle
         /// </summary>
