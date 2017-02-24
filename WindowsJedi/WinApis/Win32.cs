@@ -5,6 +5,8 @@ using WindowsJedi.WinApis.Data;
 // ReSharper disable InconsistentNaming
 
 namespace WindowsJedi.WinApis {
+    using System.Threading;
+
     /// <summary>
 	/// A big pile of Win32 low level calls, constants and data types
 	/// </summary>
@@ -287,6 +289,9 @@ namespace WindowsJedi.WinApis {
         #region Kernel 32
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		public static extern IntPtr GetModuleHandle (string lpModuleName);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentThreadId();
 		#endregion
 		#region GDI 32
 		[DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
@@ -302,6 +307,9 @@ namespace WindowsJedi.WinApis {
 		public static extern Bool DeleteObject (IntPtr hObject);
 		#endregion
 		#region User 32
+        [DllImport("user32.dll")]
+        public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
 		[DllImport("user32.dll")]
 		public static extern void keybd_event (byte key, byte scan, KeyboardInputFlags flags, IntPtr extraInfo);
 
@@ -509,5 +517,6 @@ namespace WindowsJedi.WinApis {
 		public delegate int HookProc (int nCode, Int32 wParam, IntPtr lParam);
 		#endregion
 
-	}
+
+    }
 }

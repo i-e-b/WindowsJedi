@@ -29,7 +29,7 @@
                 using (var popupWindows = new PopupWindows())
                 using (var pushback = new Pushback())
                 using (var arranger = new WindowArranger())
-                using (var experimental = new Experimental(winHook))
+                using (var experimental = new ReferenceWindow(winHook))
                 using (var hotKeys = new HotkeyCore())
                 {
                     // General features

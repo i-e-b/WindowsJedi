@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using WindowsJedi.WinApis.Data;
 
 namespace WindowsJedi.WinApis {
+    using System.Threading;
+
     /// <summary>
     /// A DWM wrapper around a Win32 windows handle
     /// </summary>
@@ -51,7 +53,7 @@ namespace WindowsJedi.WinApis {
 
         public bool Equals(Window other)
         {
-            return _handle == other._handle;
+            return other != null && _handle == other._handle;
         }
 
         public override string ToString () {
@@ -287,12 +289,14 @@ namespace WindowsJedi.WinApis {
             Win32.ShowWindow(_handle, Win32.ShowWindowCommand.Show);
         }
 
+        // System-wide foreground window.
         public static Window ForegroundWindow()
         {
             var target = Win32.GetForegroundWindow();
             return target == IntPtr.Zero ? null : new Window(target);
         }
 
+        // Active window on this GDI thread
         public static Window ActiveWindow()
         {
             var target = Win32.GetActiveWindow();
@@ -369,7 +373,43 @@ namespace WindowsJedi.WinApis {
         public void SendToFront()
         {
             //Win32.SetWindowPos(_handle, Win32.HWND_TOP, 0, 0, 0, 0, Win32.SWP_NOMOVE | Win32.SWP_NOSIZE | Win32.SWP_NOACTIVATE);
-            Win32.BringWindowToTop(_handle);
+            //Win32.BringWindowToTop(_handle);
+            ForceWindowToForeground(_handle);
+        }
+
+        ///<summary>
+        /// Forces the window to foreground.
+        ///</summary>
+        public static void ForceWindowToForeground(IntPtr hwnd)
+        {
+            // thanks to https://shlomio.wordpress.com/2012/09/04/solved-setforegroundwindow-win32-api-not-always-works/
+            AttachedThreadInputAction(() =>
+            {
+                Win32.BringWindowToTop(hwnd);
+                Win32.ShowWindow(hwnd, Win32.ShowWindowCommand.Show);
+            });
+        }
+
+        public static void AttachedThreadInputAction(Action action)
+        {
+            uint dummy;
+            var foreThread = Win32.GetWindowThreadProcessId(Win32.GetForegroundWindow(), out dummy);
+            var appThread = Win32.GetCurrentThreadId();
+            var threadsAttached = false;
+
+            try
+            {
+                threadsAttached =
+                    foreThread == appThread ||
+                    Win32.AttachThreadInput(foreThread, appThread, true);
+
+                if (threadsAttached) action();
+                else throw new ThreadStateException("AttachThreadInput failed.");
+            }
+            finally
+            {
+                if (threadsAttached) Win32.AttachThreadInput(foreThread, appThread, false);
+            }
         }
 
         /// <summary>
