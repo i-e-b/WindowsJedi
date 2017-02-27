@@ -35,8 +35,7 @@ file to the active window. Useful for VM driving and badly behaved UIs.
 
 Ideas
 -----
- * 'Reference window' - for dual monitor setup, a window marked reference always stays on the opposite monitor
-   as the current focused window (so it's always visible to the side)
+ * Record to animated GIF - Overlay window with prep, record and stop buttons. Capture to an animated GIF.
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
  * Maybe: a focus-set, where a few windows are tiled together and the main one can be rotated in.
 

@@ -1,7 +1,9 @@
 ﻿namespace WindowsJedi {
     using System;
+    using System.Drawing;
     using System.Threading;
     using System.Windows.Forms;
+    using WindowsJedi.Algorithms;
     using WindowsJedi.Components;
     using WindowsJedi.Features;
     using WindowsJedi.Properties;
@@ -19,6 +21,19 @@
 
             // Hook 'shell' events into the capturing form.
             Win32.RegisterShellHookWindow(ShellEventsDelegateForm.Handle);
+
+
+            // TESTING:
+            Console.WriteLine(DateTime.Now.ToString());
+            using (var gf = new GifWriter(@"W:\work\tmp.gif", new Size(250, 160)))
+            {
+                for (var x = 0; x < 100; x++)
+                {
+                    gf.WriteScreenFrame(new Point(10+x, 10));
+                }
+            }
+            Console.WriteLine(DateTime.Now.ToString());// manages about 30fps
+            // END TEST
 
             // Hook into system wide windowing events
             using (var winHook = new WindowHookManager())

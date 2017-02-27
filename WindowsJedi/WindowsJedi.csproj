@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Algorithms\CygonPacker.cs" />
     <Compile Include="Algorithms\FitBoxes.cs" />
+    <Compile Include="Algorithms\GifWriter.cs" />
     <Compile Include="Components\ClickInvisibleFullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>
