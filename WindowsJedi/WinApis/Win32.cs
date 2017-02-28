@@ -182,6 +182,12 @@ namespace WindowsJedi.WinApis {
         public const int WM_ACTIVATEAPP = 0x001C;
         public const int WM_GETICON = 0x7F;
         public const int WM_CLOSE = 0x0010;
+        public const int WM_LEFTBUTTONDOWN = 0x0201;
+        public const int WM_LBUTTONUP = 0x0202;
+        public const int WM_MOUSEMOVE = 0x0200;
+        public const int WM_MOUSEWHEEL = 0x020A;
+        public const int WM_RIGHTBUTTONDOWN = 0x0204;
+        public const int WM_RIGHTBUTTONUP = 0x0205;
 		#endregion
 
         #region Hwnd positions
@@ -192,8 +198,16 @@ namespace WindowsJedi.WinApis {
         #endregion
 
         #region Window hit detection
-        public static IntPtr HTCLIENT = new IntPtr(2);
+        /// <summary>The title bar of the window. Window will be moved</summary>
+        public static IntPtr HTCAPTION = new IntPtr(2);
+        /// <summary>In the window, but not in a normal window area</summary>
+        public static IntPtr HTCLIENT = new IntPtr(1);
+        /// <summary>Did not hit this window</summary>
         public static IntPtr HTNOWHERE = new IntPtr(0);
+        /// <summary>In the 'close' box</summary>
+        public static IntPtr HTCLOSE = new IntPtr(20);
+        /// <summary>In a resize box -- can resize horz or vert</summary>
+        public static IntPtr HTBOTTOMRIGHT = new IntPtr(17);
         #endregion
 
         #region Windows Hooks

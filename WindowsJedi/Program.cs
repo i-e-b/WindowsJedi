@@ -1,9 +1,7 @@
 ﻿namespace WindowsJedi {
     using System;
-    using System.Drawing;
     using System.Threading;
     using System.Windows.Forms;
-    using WindowsJedi.Algorithms;
     using WindowsJedi.Components;
     using WindowsJedi.Features;
     using WindowsJedi.Properties;
@@ -24,15 +22,16 @@
 
 
             // TESTING:
-            Console.WriteLine(DateTime.Now.ToString());
-            using (var gf = new GifWriter(@"W:\work\tmp.gif", new Size(250, 160)))
+            /*Console.WriteLine(DateTime.Now.ToString());
+            using (var gf = new GifWriter(@"W:\work\tmp.gif", new Size(320,240)))
             {
                 for (var x = 0; x < 100; x++)
                 {
                     gf.WriteScreenFrame(new Point(10+x, 10));
                 }
             }
-            Console.WriteLine(DateTime.Now.ToString());// manages about 30fps
+            Console.WriteLine(DateTime.Now.ToString());// manages about 30fps, almost regardless of capture size (up to a limit)
+            */
             // END TEST
 
             // Hook into system wide windowing events
@@ -78,6 +77,7 @@
                     TrayIcon = new NotifyTrayApp("Windows Jedi", Resources.JediIcon, "https://github.com/i-e-b/WindowsJedi");
                     TrayIcon.AddMenuItem("Settings", delegate { new Settings().ShowDialog(); });
                     TrayIcon.AddMenuItem("Re-type file", delegate { new FileRetypeChooser().Show(); });
+                    TrayIcon.AddMenuItem("Screen Capture to GIF", delegate { new ScreenCaptureForm().Show(); });
 
                     Application.ThreadException += Application_ThreadException;
 

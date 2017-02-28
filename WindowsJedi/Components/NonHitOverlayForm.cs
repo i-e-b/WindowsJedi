@@ -29,7 +29,7 @@ namespace WindowsJedi.Components
         {
             if (m.Msg == Win32.WM_NCHITTEST)
             {
-                m.Result = Win32.HTNOWHERE;	// pass to HTCLIENT
+                m.Result = Win32.HTNOWHERE;	// never a hit
                 return;
             }
             base.WndProc(ref m);

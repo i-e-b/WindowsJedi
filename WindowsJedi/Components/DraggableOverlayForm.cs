@@ -9,7 +9,7 @@
     public class DraggableOverlayForm : OverlayForm {
         protected override void WndProc (ref Message m) {
             if (m.Msg == Win32.WM_NCHITTEST) {
-                m.Result = Win32.HTCLIENT;	// pass to HTCLIENT
+                m.Result = Win32.HTCAPTION;	// report title bar, OS will handle dragging
                 return;
             }
             base.WndProc(ref m);

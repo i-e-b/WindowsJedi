@@ -57,8 +57,10 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\CygonPacker.cs" />
@@ -85,6 +87,9 @@
     <Compile Include="Features\PopupWindows.cs" />
     <Compile Include="Features\Pushback.cs" />
     <Compile Include="Components\UnclickableFullScreenForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Features\ScreenCaptureForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UserInterface\FileRetypeChooser.cs">
