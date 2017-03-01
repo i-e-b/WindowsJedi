@@ -40,6 +40,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -66,6 +67,8 @@
     <Compile Include="Algorithms\CygonPacker.cs" />
     <Compile Include="Algorithms\FitBoxes.cs" />
     <Compile Include="Algorithms\GifWriter.cs" />
+    <Compile Include="Algorithms\ImageQuant.cs" />
+    <Compile Include="Algorithms\Quantizer.cs" />
     <Compile Include="Components\ClickInvisibleFullScreenForm.cs">
       <SubType>Form</SubType>
     </Compile>

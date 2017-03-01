@@ -15,7 +15,8 @@ namespace WindowsJedi.Algorithms
         bool _firstFrame;
         readonly Size _size;
         readonly bool _drawCursor;
-        readonly Bitmap _screenBuffer; // IDEA: copy using a small (32x32?) tile at a higher rate?
+        readonly Bitmap _screenBuffer; // Input image captured from the screen
+        readonly Bitmap _8bitBuffer;   // Quantised output image to be written to 
         readonly MemoryStream _buffer;
 
         readonly byte[] applicationExtension = {
@@ -69,6 +70,7 @@ namespace WindowsJedi.Algorithms
             {
                 _screenBuffer = new Bitmap(size.Width, size.Height, g);
             }
+            _8bitBuffer = new Bitmap(size.Width, size.Height, PixelFormat.Format8bppIndexed);
         }
 
         public void Close()
@@ -113,7 +115,9 @@ namespace WindowsJedi.Algorithms
         {
             _buffer.SetLength(0);
 
-            frame.Save(_buffer, ImageFormat.Gif); // This makes a mess of the dithering. To be improved... ( http://codebetter.com/brendantompkins/2007/06/14/gif-image-color-quantizer-now-with-safe-goodness/ )
+            ImageQuant.RescaleImage(frame, 255); // this is a rough way of reducing the color count of the frame
+            frame.Save(_buffer, ImageFormat.Gif);
+
             var gifFrame = _buffer.ToArray();
 
             if (_firstFrame)
