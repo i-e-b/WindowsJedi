@@ -2,11 +2,11 @@ Windows Jedi
 ============
 
 Tools for making working with Windows 7 more friendly.
-I don't know if it works in Windows 8.x or 10 -- let me know if you have a copy.
+Also tested in Windows 10.
 
 Requirements
 ------------
-Windows 7 with Aero enabled. Doesn't work without Aero features (yet)
+Most features work in Windows 7 only if Aero is enabled. All features should work in Windows 10.
 
 What it does
 ------------
@@ -41,10 +41,12 @@ Ideas
 
 Todo / Bugs
 -----------
+ * `Win-arrow keys` movements seem to have issues on Windows 10
+ * Various issues on hi-res screens:
+	* Overlay screens don't measure hi-dpi screens correctly (affects win-tab, focus mode)
+	* Overlay screens don't work in mixed-resolution multi monitor setups
+	* GIF capture on hi-res displays does not capture the correct location
  * Win-Tab in focus mode should switch focus to selected window
- * Focus mode isn't strict enough. Should be more like switcher with only one item
- * Clean up the codebase
- * Move mouse position to window when selecting with `win-tab`?
 
 Interesting code features
 -------------------------

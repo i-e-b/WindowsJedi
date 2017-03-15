@@ -115,6 +115,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="WinApis\Data\LayeredWindowFlags.cs" />
+    <Compile Include="WinApis\ScreenExtensions.cs" />
     <Compile Include="WinApis\Window.cs" />
     <Compile Include="WinApis\WindowEnumeration.cs" />
     <Compile Include="WinApis\ManagedEvents\WindowFocusChangedEventArgs.cs" />

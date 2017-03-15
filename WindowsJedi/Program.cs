@@ -20,20 +20,6 @@
             // Hook 'shell' events into the capturing form.
             Win32.RegisterShellHookWindow(ShellEventsDelegateForm.Handle);
 
-
-            // TESTING:
-            /*Console.WriteLine(DateTime.Now.ToString());
-            using (var gf = new GifWriter(@"W:\work\tmp.gif", new Size(320,240)))
-            {
-                for (var x = 0; x < 100; x++)
-                {
-                    gf.WriteScreenFrame(new Point(10+x, 10));
-                }
-            }
-            Console.WriteLine(DateTime.Now.ToString());// manages about 30fps, almost regardless of capture size (up to a limit)
-            */
-            // END TEST
-
             // Hook into system wide windowing events
             using (var winHook = new WindowHookManager())
             {
@@ -91,7 +77,9 @@
 		static void Application_ThreadException (object sender, ThreadExceptionEventArgs e) {
 		}
 
-		private static void InitialiseWinForms() {
+		private static void InitialiseWinForms()
+		{
+		    Win32.SetProcessDPIAware();
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
 			ShellEventsDelegateForm = new ShellEventsDelegateForm();
@@ -99,5 +87,5 @@
 			ShellEventsDelegateForm.Hide();
 		}
 
-	}
+    }
 }

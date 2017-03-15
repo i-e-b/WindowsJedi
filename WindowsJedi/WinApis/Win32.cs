@@ -27,7 +27,17 @@ namespace WindowsJedi.WinApis {
 			Unicode = 4
 		}
 
-		internal enum ShowWindowCommand {
+        public enum DpiType
+        {
+            /// <summary> The effective DPI. This value should be used when determining the correct scale factor for scaling UI elements. This incorporates the scale factor set by the user for this specific display. </summary>
+            Effective = 0,
+            /// <summary> The angular DPI. This DPI ensures rendering at a compliant angular resolution on the screen. This does not include the scale factor set by the user for this specific display. </summary>
+            Angular = 1,
+            /// <summary> The raw DPI. This value is the linear DPI of the screen as measured on the screen itself. Use this value when you want to read the pixel density and not the recommended scaling setting. This does not include the scale factor set by the user for this specific display and is not guaranteed to be a supported DPI value. </summary>
+            Raw = 2,
+        }
+
+        internal enum ShowWindowCommand {
 			/// <summary>
 			/// Hides the window and activates another window.
 			/// </summary>
@@ -210,6 +220,10 @@ namespace WindowsJedi.WinApis {
         public static IntPtr HTBOTTOMRIGHT = new IntPtr(17);
         #endregion
 
+        #region Monitor constants
+        public const int MONITOR_DEFAULTTONEAREST = 2;
+        #endregion
+
         #region Windows Hooks
         public const int WH_KEYBOARD_LL = 13;
 		public const int WH_CBT = 5;
@@ -323,6 +337,10 @@ namespace WindowsJedi.WinApis {
 		#region User 32
         [DllImport("user32.dll")]
         public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+        
+        [DllImport("user32.dll")]
+        public static extern bool SetProcessDPIAware();
 
 		[DllImport("user32.dll")]
 		public static extern void keybd_event (byte key, byte scan, KeyboardInputFlags flags, IntPtr extraInfo);
@@ -506,6 +524,11 @@ namespace WindowsJedi.WinApis {
 
         [DllImport("user32.dll")]
         public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        //https://msdn.microsoft.com/en-us/library/windows/desktop/dd145062.aspx
+        [DllImport("User32.dll")]
+        public static extern IntPtr MonitorFromPoint([In]Point pt, [In]uint dwFlags);
+
         #endregion
         #region DWM api
         [DllImport("dwmapi.dll")]
@@ -519,10 +542,15 @@ namespace WindowsJedi.WinApis {
 
 		[DllImport("dwmapi.dll")]
 		public static extern int DwmUpdateThumbnailProperties (IntPtr hThumb, ref DWM_THUMBNAIL_PROPERTIES props);
-		#endregion
+        #endregion
+        #region SH-Core
+        //https://msdn.microsoft.com/en-us/library/windows/desktop/dn280510.aspx
+        [DllImport("Shcore.dll")]
+        public static extern IntPtr GetDpiForMonitor([In]IntPtr hmonitor, [In]DpiType dpiType, [Out]out uint dpiX, [Out]out uint dpiY);
+        #endregion
 
-		#region Delegates
-		public delegate bool EnumWindowsCallback (IntPtr hwnd, int lParam);
+        #region Delegates
+        public delegate bool EnumWindowsCallback (IntPtr hwnd, int lParam);
 		
 		public delegate void WinEventDelegate (IntPtr hWinEventHook,
 		 uint eventType, IntPtr hwnd, int idObject,
@@ -530,7 +558,5 @@ namespace WindowsJedi.WinApis {
 
 		public delegate int HookProc (int nCode, Int32 wParam, IntPtr lParam);
 		#endregion
-
-
     }
 }

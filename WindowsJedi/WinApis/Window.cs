@@ -26,6 +26,10 @@ namespace WindowsJedi.WinApis {
             _title = title;
         }
 
+        public Window(Form winForm) : this(winForm.Handle)
+        {
+        }
+
         ~Window()
         {
             Dispose(false);
@@ -110,7 +114,7 @@ namespace WindowsJedi.WinApis {
         }
 
         /// <summary>
-        /// Gives the current layout rectangle of the window
+        /// Gives the current layout rectangle of the window relative to the entire desktop layout
         /// </summary>
 		public Rectangle LayoutRectangle {
 			get {
@@ -119,6 +123,18 @@ namespace WindowsJedi.WinApis {
                 return new Rectangle(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
 			}
 		}
+
+        /// <summary>
+        /// Gets the window layout rectangle relative to it's containing screen
+        /// </summary>
+        public Rectangle ScreenRelativeRectangle {
+            get {
+                Win32.Rect rect;
+                Win32.GetWindowRect(_handle, out rect);
+                var scr = PrimaryScreen();
+                return new Rectangle(rect.Left - scr.Bounds.X, rect.Top - scr.Bounds.Y, rect.Right - rect.Left, rect.Bottom - rect.Top);
+            }
+        }
 
         /// <summary>
         /// Internal target for this window. Used for layout algorithms.
@@ -176,6 +192,7 @@ namespace WindowsJedi.WinApis {
         /// Target window's handle
         /// </summary>
         public IntPtr Handle { get { return _handle; } }
+
 
         /// <summary>
         /// Return approximate aspect ratio of the thumbnail DWM would show.
@@ -456,6 +473,18 @@ namespace WindowsJedi.WinApis {
         public void MoveTo(Point newOffset)
         {
             Win32.SetWindowPos(_handle, IntPtr.Zero, newOffset.X, newOffset.Y, 0, 0, Win32.SWP_NOZORDER | Win32.SWP_NOSIZE);
+        }
+
+        /// <summary>
+        /// Calculates screen scaling factor by the difference between client rectangle and screen rectangle.
+        /// </summary>
+        public double GetScaleFactor()
+        {
+            var client = Rectangle;
+            var screen = LayoutRectangle;
+            var sx = client.Width / (double)screen.Width;
+            var sy = client.Height / (double)screen.Height;
+            return Math.Max(sx, sy);
         }
     }
 }

@@ -6,7 +6,7 @@
     using WindowsJedi.WinApis.ManagedEvents;
 
     /// <summary>
-    /// Current experiment - 'reference windows'
+    /// 'reference windows'
     /// a window marked reference always stays on the opposite monitor from the currently focused window
     /// on single screen set-up we do nothing. If the 'reference' window is the current focus, we do nothing.
     ///

@@ -32,9 +32,24 @@
 
         void _recordingTimer_Tick(object sender, EventArgs e)
         {
-            if (_outputFile != null)
+            if (_outputFile != null) SnapFrame();
+        }
+
+
+        /// <summary>
+        /// Save a frame (handles scaling, but does not control checks)
+        /// </summary>
+        void SnapFrame()
+        {
+            using (var win = new Window(this))
             {
-                _outputFile.WriteScreenFrame(new Point(Left + 11, Top + 11));
+                var screen = win.PrimaryScreen();
+                var scale = win.GetScaleFactor();
+                var screenRel = win.ScreenRelativeRectangle;
+                var offset = 11 * scale;
+                var left = (screenRel.X * scale) + screen.Bounds.X;
+                var top = (screenRel.Y * scale) + screen.Bounds.Y;
+                _outputFile.WriteScreenFrame(new Point((int)(left + offset), (int)(top + offset)));
             }
         }
 
@@ -75,8 +90,7 @@
 
         void AddFrame()
         {
-            if (_recordingTimer.Enabled) return;
-            _outputFile.WriteScreenFrame(new Point(Left + 11, Top + 11));
+            if (!_recordingTimer.Enabled) SnapFrame();
         }
 
         void ToggleRecording()
