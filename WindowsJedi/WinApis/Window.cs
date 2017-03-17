@@ -456,7 +456,7 @@ namespace WindowsJedi.WinApis {
 
         public void SetBounds(int left, int top, int width, int height)
         {
-            Win32.SetWindowPos(_handle, IntPtr.Zero, left, top, width, height, Win32.SWP_NOZORDER);
+            Win32.SetWindowPos(_handle, IntPtr.Zero, left, top, width, height, Win32.SWP_NOZORDER | Win32.SWP_NOACTIVATE);
         }
 
         /// <summary>

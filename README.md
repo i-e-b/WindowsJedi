@@ -42,10 +42,11 @@ Ideas
 Todo / Bugs
 -----------
  * `Win-arrow keys` movements seem to have issues on Windows 10
+ * Gif capture should have a mode to take a frame-per-keystroke
  * Various issues on hi-res screens:
 	* Overlay screens don't measure hi-dpi screens correctly (affects win-tab, focus mode)
 	* Overlay screens don't work in mixed-resolution multi monitor setups
-	* GIF capture on hi-res displays does not capture the correct location
+	* GIF capture on hi-res displays does not capture the entire area bounded by the frame overlay window
  * Win-Tab in focus mode should switch focus to selected window
 
 Interesting code features

@@ -1,4 +1,6 @@
-﻿namespace WindowsJedi.UserInterface
+﻿using WindowsJedi.Components;
+
+namespace WindowsJedi.UserInterface
 {
     using System;
     using System.Globalization;
@@ -7,7 +9,7 @@
     using System.Threading;
     using System.Windows.Forms;
 
-    public partial class FileRetypeChooser : Form
+    public partial class FileRetypeChooser : AutoScaleForm
     {
         public FileRetypeChooser()
         {

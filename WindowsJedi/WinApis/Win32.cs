@@ -198,6 +198,9 @@ namespace WindowsJedi.WinApis {
         public const int WM_MOUSEWHEEL = 0x020A;
         public const int WM_RIGHTBUTTONDOWN = 0x0204;
         public const int WM_RIGHTBUTTONUP = 0x0205;
+        public const int WM_DPICHANGED = 0x02E0;
+        public const int WM_NCCREATE = 0x0081;
+        public const int WM_MOVING = 0x0216;
 		#endregion
 
         #region Hwnd positions
@@ -338,6 +341,8 @@ namespace WindowsJedi.WinApis {
         [DllImport("user32.dll")]
         public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
 
+        [DllImport("user32.dll")]
+        public static extern void EnableNonClientDpiScaling(IntPtr windowHandle);
         
         [DllImport("user32.dll")]
         public static extern bool SetProcessDPIAware();
