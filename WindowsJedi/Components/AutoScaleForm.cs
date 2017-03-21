@@ -59,26 +59,28 @@ namespace WindowsJedi.Components
                     if (Math.Abs(scale - LastScale) > 0.01)
                     {
                         LastScale = scale;
-                        /* foreach (Control ctrl in Controls)
-                         {
-                             if (ctrl.Anchor.HasFlag(AnchorStyles.Top)
-                                 && ctrl.Anchor.HasFlag(AnchorStyles.Bottom))
-                             {
-                                 // Should fill space?
-                                 //ctrl.Height = (int)(ctrl.Height / scale);
-                             }
-                             else
-                             {
-                                 //ctrl.Height = (int)(ctrl.Height * scale);
-                                 //ctrl.Scale(new SizeF(scale, scale));
-                             }
-                             //ctrl.Width = (int)(ctrl.Width * scale);
-                         }*/
+                        foreach (Control ctrl in Controls)
+                        {
+                            if (ctrl.Anchor.HasFlag(AnchorStyles.Top)
+                                && ctrl.Anchor.HasFlag(AnchorStyles.Bottom))
+                            {
+                                // Should fill space?
+                                //ctrl.Height = (int)(ctrl.Height / scale);
+                                ctrl.Width = (int)(ctrl.Width * scale);
+                            }
+                            else
+                            {
+                                ctrl.Height = (int)(ctrl.Height * scale);
+                                ctrl.Width = (int)(ctrl.Width * scale);
+                                //ctrl.Scale(new SizeF(scale, scale));
+                            }
+                            //ctrl.Width = (int)(ctrl.Width * scale);
+                        }
                         var newWidth = (int)(Width * scale);
                         var newHeight = (int)(Height * scale);
                         SuspendLayout();
-                        Scale(new SizeF(scale, scale));
-                        Font = new Font(Font.FontFamily, Font.Size * scale, Font.Style);
+                        //Scale(new SizeF(scale, scale));
+                        //Font = new Font(Font.FontFamily, Font.Size * scale, Font.Style);
                         ResumeLayout();
                         win.SetBounds(Left, Top, newWidth, newHeight);
                     }

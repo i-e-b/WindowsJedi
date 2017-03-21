@@ -13,7 +13,7 @@ namespace WindowsJedi.WinApis
             var point = new Win32.Point(screen.Bounds.Left + 1, screen.Bounds.Top + 1);
             var hmonitor = Win32.MonitorFromPoint(point, Win32.MONITOR_DEFAULTTONEAREST);
 
-            var result = Win32.GetDpiForMonitor(hmonitor, Win32.DpiType.Effective, out dpiX, out dpiY).ToInt32();
+            var result = Win32.GetDpiForMonitor(hmonitor, Win32.DpiType.Raw, out dpiX, out dpiY).ToInt32();
 
             if (result != 0)
             {
