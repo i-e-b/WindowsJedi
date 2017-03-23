@@ -23,6 +23,7 @@
             _recordingTimer = new Timer { Enabled = false, Interval = FPS_20 };
             _recordingTimer.Tick += _recordingTimer_Tick;
 
+            AutoScaleMode = AutoScaleMode.Dpi;
             FormBorderStyle = FormBorderStyle.None;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -44,11 +45,11 @@
             using (var win = new Window(this))
             {
                 var screen = win.PrimaryScreen();
-                var s_scale = screen.GetEffectiveScale();
+                var sScale = screen.GetEffectiveScale();
                 var screenRel = win.ScreenRelativeRectangle;
-                var offset = 11 * s_scale;
-                var left = (screenRel.X * s_scale) + screen.Bounds.X;
-                var top = (screenRel.Y * s_scale) + screen.Bounds.Y;
+                var offset = 11 * sScale;
+                var left = (screenRel.X /* * sScale*/) + screen.Bounds.X; // if not per-monitor-dpi aware, you need to adjust for scale here
+                var top = (screenRel.Y /* * sScale*/) + screen.Bounds.Y;  // but with the manifest line given, you get real pixel coords.
                 _outputFile.WriteScreenFrame(new Point((int)(left + offset), (int)(top + offset)));
             }
         }
@@ -66,6 +67,7 @@
 
         void ChooseFile()
         {
+            //this.Font = new Font(Font.FontFamily, 200);
             var dlog = new SaveFileDialog();
             dlog.OverwritePrompt = true;
             dlog.DefaultExt = "gif";
@@ -105,8 +107,11 @@
             base.OnActivated(e);
         }
 
+        private bool _redrawing = false;
         void UpdateOverlay()
         {
+            if (_redrawing) return;
+            _redrawing = true;
             TopMost = true;
             TopLevel = true;
             BringToFront();
@@ -114,20 +119,19 @@
             {
                 SetBitmap(bitmap);
             }
+            _redrawing = false;
         }
 
-        private double scale = 1.0;
+        double _scale = 1.0;
+        private double _prevScale = 1.0;
 
-        int s(float i) { return (int) (i * scale); }
+        int s(float i) { return (int) (i * _scale); }
 
         Bitmap DrawInner()
         {
-            using (var win = new Window(this))
-            {
-                var screen = win.PrimaryScreen();
-                scale = screen.GetEffectiveScale();
-            }
-            
+            SuspendLayout();
+            AdjustScale();
+
             var b = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
             using (var g = Graphics.FromImage(b))
             {
@@ -141,10 +145,10 @@
                 g.FillRectangle(Brushes.Beige, Width - s(10), 0, Width, Height);
                 g.FillRectangle(Brushes.Beige, 0, 0, Width, s(10));
                 g.FillRectangle(Brushes.Beige, 0, Height - s(20), Width, Height);
-                
+
                 // outline of solid edge bars
-                g.DrawRectangle(Pens.Black, 0,0,Width-1,Height-1);
-                g.DrawRectangle(Pens.Black, s(10),s(10),Width-s(20),Height-s(30));
+                g.DrawRectangle(Pens.Black, 0, 0, Width - 1, Height - 1);
+                g.DrawRectangle(Pens.Black, s(10), s(10), Width - s(20), Height - s(30));
 
                 // resize chevrons
                 if (_outputFile == null)
@@ -168,7 +172,23 @@
                 // snap frame icon
                 DrawSnapFrameIcon(g, s(40), Height - s(17));
             }
+            ResumeLayout();
             return b;
+        }
+
+        private void AdjustScale()
+        {
+            using (var win = new Window(this))
+            {
+                var screen = win.PrimaryScreen();
+                _scale = screen.GetEffectiveScale();
+                if (!(Math.Abs(_scale - _prevScale) > 0.01)) return;
+
+                var diff = _scale - _prevScale;
+                _prevScale = _scale;
+                Width = (int)Math.Round(Width + diff * 25);
+                Height = (int)Math.Round(Height + diff * 45);
+            }
         }
 
         void DrawSnapFrameIcon(Graphics g, int x, int y)
@@ -226,6 +246,12 @@
             if (_disposed) return;
             switch (m.Msg)
             {
+                /*case Win32.WM_NCCREATE:
+                    {
+                        Win32.EnableNonClientDpiScaling(Handle);
+                        base.WndProc(ref m);
+                        return;
+                    }*/
                 case Win32.WM_NCHITTEST: // screen-space coords
                     {
                         var c = PointToClient(GetPoint(m.LParam));
@@ -259,6 +285,7 @@
                 case Win32.WM_DPICHANGED:
                     {
                         UpdateOverlay();
+                        base.WndProc(ref m);
                         return;
                     }
                 default:
