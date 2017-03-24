@@ -39,13 +39,11 @@ Ideas
  * Keyboard navigation mode - display keyboard shortcuts to focus major aspects of the foreground window
  * Maybe: a focus-set, where a few windows are tiled together and the main one can be rotated in.
 
-Todo / Bugs
+Bugs
 -----------
- * Win-Tab in focus mode should switch focus to selected window
- * Focus mode isn't strict enough. Should be more like switcher with only one item
- * Clean up the codebase
- * Move mouse position to window when selecting with `win-tab`?
-
+ * Capture screen needs to resize when switching dpi, or rescale resultant capture
+ * win-tab screen needs to detect changes to dektop layout (adding/removing screens)
+ * screen overlays (for focus/win-tab) need to be 1-per-screen to handle odd layouts.
 Interesting code features
 -------------------------
 Adapted from a few places; there is multi-monitor full screen overlay, hot-key action hooks, and a fast box packing algorithm.
