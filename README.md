@@ -1,12 +1,12 @@
 Windows Jedi
 ============
 
-Tools for making working with Windows 7 more friendly.
-I don't know if it works in Windows 8.x or 10 -- let me know if you have a copy.
+Tools for making working with Windows more friendly.
+Under Windows 10, this must be run as Administrator to take effect.
 
 Requirements
 ------------
-Windows 7 with Aero enabled. Doesn't work without Aero features (yet)
+Windows 7 or higher with Aero enabled. Doesn't work without Aero features (yet)
 
 What it does
 ------------
